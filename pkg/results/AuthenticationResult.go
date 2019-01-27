@@ -1,12 +1,18 @@
 package results
 
+import "github.com/markzuber/msalgo/internal/requests"
+
 // AuthenticationResult stuff
 type AuthenticationResult struct {
-	accessToken string
+	tokenResponse *requests.TokenResponse
 }
 
 // CreateAuthenticationResult stuff
-func CreateAuthenticationResult(accessToken string) *AuthenticationResult {
-	ar := &AuthenticationResult{accessToken}
+func CreateAuthenticationResult(tokenResponse *requests.TokenResponse) *AuthenticationResult {
+	ar := &AuthenticationResult{tokenResponse}
 	return ar
+}
+
+func (ar *AuthenticationResult) GetAccessToken() string {
+	return ar.tokenResponse.GetAccessToken()
 }

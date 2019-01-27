@@ -19,3 +19,7 @@ func CreateApplicationCommonParameters(clientID string) *ApplicationCommonParame
 func (p *ApplicationCommonParameters) SetAuthorityURI(authorityURI string) {
 	p.authorityURI = authorityURI
 }
+
+func (p *ApplicationCommonParameters) GetClientID() string {
+	return p.clientID
+}

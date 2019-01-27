@@ -9,7 +9,7 @@ type WebRequestManager struct {
 
 // GetUserRealm stuff
 func (wrm *WebRequestManager) GetUserRealm(authParameters *AuthParametersInternal) (*UserRealm, error) {
-	url := authParameters.GetAuthorityEndpoints().GetUserRealmEndpoint(authParameters.GetUserName())
+	url := authParameters.GetAuthorityEndpoints().GetUserRealmEndpoint(authParameters.GetUsername())
 	httpManagerResponse, err := wrm.httpManager.Get(url, wrm.getAadHeaders(authParameters))
 	if err != nil {
 		return nil, err

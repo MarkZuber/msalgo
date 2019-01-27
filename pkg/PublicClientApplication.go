@@ -8,8 +8,9 @@ import (
 
 // PublicClientApplication stuff
 type PublicClientApplication struct {
-	commonParameters *parameters.ApplicationCommonParameters
-	pcaParameters    *parameters.PublicClientApplicationParameters
+	commonParameters  *parameters.ApplicationCommonParameters
+	pcaParameters     *parameters.PublicClientApplicationParameters
+	webRequestManager requests.IWebRequestManager
 }
 
 func createPublicClientApplication(
@@ -21,9 +22,22 @@ func createPublicClientApplication(
 	return pca
 }
 
-// AcquireTokenInteractive stuff
-func (pca *PublicClientApplication) AcquireTokenInteractive(
-	interactiveParameters *parameters.AcquireTokenInteractiveParameters) (*results.AuthenticationResult, error) {
-	req := requests.CreateInteractiveRequest(interactiveParameters)
-	return req.Execute()
+// AcquireTokenByUsernamePassword stuff
+func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(
+	usernamePasswordParameters *parameters.AcquireTokenUsernamePasswordParameters) (*results.AuthenticationResult, error) {
+	authParams := createAuthParametersInternal(pca.commonParameters, usernamePasswordParameters.GetCommonParameters())
+	pca.pcaParameters.AugmentAuthParametersInternal(authParams)
+	usernamePasswordParameters.AugmentAuthParametersInternal(authParams)
+	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, authParams)
+	if tokenResponse, err := req.Execute(); err == nil {
+		return results.CreateAuthenticationResult(tokenResponse), nil
+	}
+	return nil, err
+}
+
+func createAuthParametersInternal(
+	applicationCommonParameters *parameters.ApplicationCommonParameters,
+	commonParameters *parameters.AcquireTokenCommonParameters) *AuthParametersInternal {
+	authParams := requests.CreateAuthParametersInternal(applicationCommonParameters.GetClientID())
+	return authParams
 }
