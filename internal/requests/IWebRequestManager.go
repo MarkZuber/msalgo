@@ -1,33 +1,6 @@
 package requests
 
-type WsTrustMexDocument struct {
-}
-
-type AuthParametersInternal struct {
-}
-
-type TokenResponse struct {
-}
-
-type SamlTokenInfo struct {
-}
-
-type WsTrustEndpoint struct {
-}
-
-type WsTrustResponse struct {
-}
-
-type ClientCertificate struct {
-}
-
-type UserRealm struct {
-}
-
-func (u *UserRealm) GetAccountType() int {
-	return 1
-}
-
+// IWebRequestManager interface
 type IWebRequestManager interface {
 	GetUserRealm(authParameters *AuthParametersInternal) (*UserRealm, error)
 	GetMex(federationMetadataURL string) (*WsTrustMexDocument, error)
