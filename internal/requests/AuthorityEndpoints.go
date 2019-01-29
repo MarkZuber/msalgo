@@ -1,8 +1,13 @@
 package requests
 
+import (
+	"fmt"
+	"net/url"
+)
+
 type AuthorityEndpoints struct {
 }
 
 func (endpoints *AuthorityEndpoints) GetUserRealmEndpoint(username string) string {
-	return "https://<environment>/common/UserRealm/<user>?api-version=1.0"
+	return fmt.Sprintf("https://%s/common/UserRealm/%s?api-version=1.0", "login.microsoftonline.com", url.PathEscape(username))
 }

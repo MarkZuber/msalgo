@@ -2,8 +2,10 @@ package requests
 
 import (
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // HTTPManager stuff
@@ -53,7 +55,15 @@ func CreateHTTPManagerResponse(resp *http.Response) (*HTTPManagerResponse, error
 
 // CreateHTTPManager stuff
 func CreateHTTPManager() *HTTPManager {
+	tr := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: false,
+		}).DialContext,
+	}
 	client := &http.Client{}
+	client.Transport = tr
 	mgr := &HTTPManager{client}
 	return mgr
 }

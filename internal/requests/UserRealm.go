@@ -1,6 +1,9 @@
 package requests
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"log"
+)
 
 type UserRealmAccountType int
 
@@ -11,19 +14,20 @@ const (
 )
 
 type UserRealm struct {
-	accountType       string `json:"account_type"`
-	domainName        string `json:"domain_name"`
-	cloudInstanceNmae string `json:"cloud_instance_name"`
-	cloudAudienceURN  string `json:"cloud_audience_urn"`
+	AccountType       string `json:"account_type"`
+	DomainName        string `json:"domain_name"`
+	CloudInstanceNmae string `json:"cloud_instance_name"`
+	CloudAudienceURN  string `json:"cloud_audience_urn"`
 
 	// required if accountType is Federated
-	federationProtocol    string `json:"federation_protocol"`
-	federationMetadataURL string `json:"federation_metadata_url"`
+	FederationProtocol    string `json:"federation_protocol"`
+	FederationMetadataURL string `json:"federation_metadata_url"`
 }
 
 // CreateUserRealm stuff
 func CreateUserRealm(responseData string) (*UserRealm, error) {
-	var userRealm *UserRealm
+	log.Println(responseData)
+	userRealm := &UserRealm{}
 	var err = json.Unmarshal([]byte(responseData), userRealm)
 	if err != nil {
 		return nil, err
@@ -39,19 +43,19 @@ func CreateUserRealm(responseData string) (*UserRealm, error) {
 }
 
 func (u *UserRealm) GetAccountType() UserRealmAccountType {
-	if u.accountType == "Federated" {
+	if u.AccountType == "Federated" {
 		return Federated
 	}
-	if u.accountType == "Managed" {
+	if u.AccountType == "Managed" {
 		return Managed
 	}
 	return Unknown
 }
 
 func (u *UserRealm) GetFederationMetadataURL() string {
-	return u.federationMetadataURL
+	return u.FederationMetadataURL
 }
 
 func (u *UserRealm) GetCloudAudienceURN() string {
-	return u.cloudAudienceURN
+	return u.CloudAudienceURN
 }

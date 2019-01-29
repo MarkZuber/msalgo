@@ -1,6 +1,9 @@
 package requests
 
-import "errors"
+import (
+	"errors"
+	"log"
+)
 
 // UsernamePasswordRequest stuff
 type UsernamePasswordRequest struct {
@@ -23,8 +26,11 @@ func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
 		return nil, err
 	}
 
+	log.Println("got user realm")
+
 	switch accountType := userRealm.GetAccountType(); accountType {
 	case Federated:
+		log.Println("FEDERATED")
 		if mexDoc, err := req.webRequestManager.GetMex(userRealm.GetFederationMetadataURL()); err == nil {
 			wsTrustEndpoint := mexDoc.GetWsTrustUsernamePasswordEndpoint()
 			if wsTrustResponse, err := req.webRequestManager.GetWsTrustResponse(req.authParameters, userRealm.GetCloudAudienceURN(), wsTrustEndpoint); err == nil {
@@ -36,6 +42,7 @@ func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
 		// todo: check for ui interaction in api result...
 		return nil, err
 	case Managed:
+		log.Println("MANAGED")
 		return req.webRequestManager.GetAccessTokenFromUsernamePassword(req.authParameters)
 	default:
 		return nil, errors.New("Unknown account type")
