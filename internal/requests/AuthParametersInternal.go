@@ -1,18 +1,28 @@
 package requests
 
 type AuthParametersInternal struct {
-	authority   string
-	endpoints   *AuthorityEndpoints
-	clientID    string
-	redirecturi string
-	accountid   string
-	username    string
-	password    string
+	authorityInfo *AuthorityInfo
+	correlationID string
+	endpoints     *AuthorityEndpoints
+	clientID      string
+	redirecturi   string
+	accountid     string
+	username      string
+	password      string
+	scopes        []string
 }
 
 func CreateAuthParametersInternal(clientID string) *AuthParametersInternal {
 	p := &AuthParametersInternal{clientID: clientID}
 	return p
+}
+
+func (ap *AuthParametersInternal) GetClientID() string {
+	return ap.clientID
+}
+
+func (ap *AuthParametersInternal) GetCorrelationID() string {
+	return ap.correlationID
 }
 
 func (ap *AuthParametersInternal) GetAuthorityEndpoints() *AuthorityEndpoints {
@@ -33,4 +43,16 @@ func (ap *AuthParametersInternal) GetPassword() string {
 
 func (ap *AuthParametersInternal) SetPassword(password string) {
 	ap.password = password
+}
+
+func (ap *AuthParametersInternal) GetRequestedScopes() []string {
+	return ap.scopes
+}
+
+func (ap *AuthParametersInternal) GetAuthorityInfo() *AuthorityInfo {
+	return ap.authorityInfo
+}
+
+func (ap *AuthParametersInternal) GetRedirectURI() string {
+	return ap.redirecturi
 }

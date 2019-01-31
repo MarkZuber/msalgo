@@ -16,3 +16,11 @@ func CreateSamlTokenInfo(assertionType SamlAssertionType, assertion string) *Sam
 	tokenInfo := &SamlTokenInfo{assertionType, assertion}
 	return tokenInfo
 }
+
+func (sti *SamlTokenInfo) GetAssertionType() SamlAssertionType {
+	return sti.assertionType
+}
+
+func (sti *SamlTokenInfo) GetAssertion() string {
+	return sti.assertion
+}

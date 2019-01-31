@@ -7,3 +7,8 @@ type TokenResponse struct {
 func (tr *TokenResponse) GetAccessToken() string {
 	return tr.accessToken
 }
+
+func CreateTokenResponse(authParameters *AuthParametersInternal, responseData string) (*TokenResponse, error) {
+	tr := &TokenResponse{}
+	return tr, nil
+}
