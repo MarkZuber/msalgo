@@ -31,6 +31,7 @@ func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(
 	usernamePasswordParameters *parameters.AcquireTokenUsernamePasswordParameters) (*results.AuthenticationResult, error) {
 	authParams := createAuthParametersInternal(pca.commonParameters, usernamePasswordParameters.GetCommonParameters())
 	pca.pcaParameters.AugmentAuthParametersInternal(authParams)
+	authParams.SetAuthorizationType(requests.UsernamePassword)
 	usernamePasswordParameters.AugmentAuthParametersInternal(authParams)
 	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, authParams)
 	tokenResponse, err := req.Execute()

@@ -1,15 +1,27 @@
 package requests
 
+type AuthorizationType int
+
+const (
+	None AuthorizationType = iota
+	UsernamePassword
+	WindowsIntegratedAuth
+	AuthCode
+	Interactive
+	Certificate
+)
+
 type AuthParametersInternal struct {
-	authorityInfo *AuthorityInfo
-	correlationID string
-	endpoints     *AuthorityEndpoints
-	clientID      string
-	redirecturi   string
-	accountid     string
-	username      string
-	password      string
-	scopes        []string
+	authorityInfo     *AuthorityInfo
+	correlationID     string
+	endpoints         *AuthorityEndpoints
+	clientID          string
+	redirecturi       string
+	accountid         string
+	username          string
+	password          string
+	scopes            []string
+	authorizationType AuthorizationType
 }
 
 func CreateAuthParametersInternal(clientID string) *AuthParametersInternal {
@@ -55,4 +67,12 @@ func (ap *AuthParametersInternal) GetAuthorityInfo() *AuthorityInfo {
 
 func (ap *AuthParametersInternal) GetRedirectURI() string {
 	return ap.redirecturi
+}
+
+func (ap *AuthParametersInternal) GetAuthorizationType() AuthorizationType {
+	return ap.authorizationType
+}
+
+func (ap *AuthParametersInternal) SetAuthorizationType(authType AuthorizationType) {
+	ap.authorizationType = authType
 }

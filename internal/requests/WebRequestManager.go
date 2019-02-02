@@ -56,7 +56,45 @@ func (wrm *WebRequestManager) GetMex(federationMetadataURL string) (*WsTrustMexD
 }
 
 func (wrm *WebRequestManager) GetWsTrustResponse(authParameters *AuthParametersInternal, cloudAudienceURN string, endpoint *WsTrustEndpoint) (*WsTrustResponse, error) {
-	return nil, nil
+	var wsTrustRequestMessage string
+
+	switch authParameters.GetAuthorizationType() {
+	case WindowsIntegratedAuth:
+		wsTrustRequestMessage = endpoint.BuildTokenRequestMessageWIA(cloudAudienceURN)
+	case UsernamePassword:
+		wsTrustRequestMessage = endpoint.BuildTokenRequestMessageUsernamePassword(
+			cloudAudienceURN, authParameters.GetUsername(), authParameters.GetPassword())
+	default:
+		log.Println("unknown auth type!")
+	}
+
+	var soapAction string
+
+	// todo: make consts out of these strings
+	if endpoint.GetVersion() == Trust2005 {
+		soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"
+	} else {
+		soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"
+	}
+
+	headers := map[string]string{
+		"SOAPAction": soapAction,
+	}
+
+	addContentTypeHeader(headers, SoapXmlUtf8)
+
+	log.Println("calling POST for wstrustresponse")
+	log.Println(endpoint.GetURL())
+	log.Println(wsTrustRequestMessage)
+
+	response, err := wrm.httpManager.Post(endpoint.GetURL(), wsTrustRequestMessage, headers)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(response.GetResponseData())
+
+	return CreateWsTrustResponse(response.GetResponseData()), nil
 }
 
 func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *AuthParametersInternal, samlGrant *SamlTokenInfo) (*TokenResponse, error) {

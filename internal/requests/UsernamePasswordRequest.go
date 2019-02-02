@@ -33,8 +33,8 @@ func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
 		log.Println("FEDERATED")
 		if mexDoc, err := req.webRequestManager.GetMex(userRealm.GetFederationMetadataURL()); err == nil {
 			wsTrustEndpoint := mexDoc.GetWsTrustUsernamePasswordEndpoint()
-			if wsTrustResponse, err := req.webRequestManager.GetWsTrustResponse(req.authParameters, userRealm.GetCloudAudienceURN(), wsTrustEndpoint); err == nil {
-				if samlGrant, err := wsTrustResponse.GetSAMLAssertion(wsTrustEndpoint); err == nil {
+			if wsTrustResponse, err := req.webRequestManager.GetWsTrustResponse(req.authParameters, userRealm.GetCloudAudienceURN(), &wsTrustEndpoint); err == nil {
+				if samlGrant, err := wsTrustResponse.GetSAMLAssertion(&wsTrustEndpoint); err == nil {
 					return req.webRequestManager.GetAccessTokenFromSamlGrant(req.authParameters, samlGrant)
 				}
 			}
