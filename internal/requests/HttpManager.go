@@ -2,6 +2,7 @@ package requests
 
 import (
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -43,6 +44,10 @@ func CreateHTTPManagerResponse(resp *http.Response) (*HTTPManagerResponse, error
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("CreateHTTPManagerResponse")
+	log.Println(resp.Status)
+	log.Println(string(body))
 
 	headers := make(map[string]string)
 	for k, v := range resp.Header {

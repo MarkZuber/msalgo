@@ -57,15 +57,21 @@ func (wrm *WebRequestManager) GetMex(federationMetadataURL string) (*WsTrustMexD
 
 func (wrm *WebRequestManager) GetWsTrustResponse(authParameters *AuthParametersInternal, cloudAudienceURN string, endpoint *WsTrustEndpoint) (*WsTrustResponse, error) {
 	var wsTrustRequestMessage string
+	var err error
 
 	switch authParameters.GetAuthorizationType() {
 	case WindowsIntegratedAuth:
-		wsTrustRequestMessage = endpoint.BuildTokenRequestMessageWIA(cloudAudienceURN)
+		wsTrustRequestMessage, err = endpoint.BuildTokenRequestMessageWIA(cloudAudienceURN)
 	case UsernamePassword:
-		wsTrustRequestMessage = endpoint.BuildTokenRequestMessageUsernamePassword(
+		wsTrustRequestMessage, err = endpoint.BuildTokenRequestMessageUsernamePassword(
 			cloudAudienceURN, authParameters.GetUsername(), authParameters.GetPassword())
 	default:
 		log.Println("unknown auth type!")
+		err = errors.New("Unknown auth type")
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	var soapAction string

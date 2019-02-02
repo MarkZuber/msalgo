@@ -1,6 +1,12 @@
 package requests
 
-import "log"
+import (
+	"encoding/xml"
+	"log"
+	"time"
+
+	uuid "github.com/twinj/uuid"
+)
 
 type WsTrustEndpointVersion int
 
@@ -22,11 +28,95 @@ func (wte *WsTrustEndpoint) GetVersion() WsTrustEndpointVersion {
 	return wte.endpointVersion
 }
 
-func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType, cloudAudienceURN string, username string, password string) string {
+type wsTrustTokenRequestEnvelope struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Text    string   `xml:",chardata"`
+	S       string   `xml:"s,attr"`
+	Wsa     string   `xml:"wsa,attr"`
+	Wsu     string   `xml:"wsu,attr"`
+	Header  struct {
+		Text   string `xml:",chardata"`
+		Action struct {
+			Text           string `xml:",chardata"`
+			MustUnderstand string `xml:"mustUnderstand,attr"`
+		} `xml:"Action"`
+		MessageID struct {
+			Text string `xml:",chardata"`
+		} `xml:"messageID"`
+		ReplyTo struct {
+			Text    string `xml:",chardata"`
+			Address struct {
+				Text string `xml:",chardata"`
+			} `xml:"Address"`
+		} `xml:"ReplyTo"`
+		To struct {
+			Text           string `xml:",chardata"`
+			MustUnderstand string `xml:"mustUnderstand,attr"`
+		} `xml:"To"`
+		Security struct {
+			Text           string `xml:",chardata"`
+			MustUnderstand string `xml:"mustUnderstand,attr"`
+			Wsse           string `xml:"wsse,attr"`
+			Timestamp      struct {
+				Text    string `xml:",chardata"`
+				ID      string `xml:"Id,attr"`
+				Created struct {
+					Text string `xml:",chardata"`
+				} `xml:"Created"`
+				Expires struct {
+					Text string `xml:",chardata"`
+				} `xml:"Expires"`
+			} `xml:"Timestamp"`
+			UsernameToken struct {
+				Text     string `xml:",chardata"`
+				ID       string `xml:"Id,attr"`
+				Username struct {
+					Text string `xml:",chardata"`
+				} `xml:"Username"`
+				Password struct {
+					Text string `xml:",chardata"`
+				} `xml:"Password"`
+			} `xml:"UsernameToken"`
+		} `xml:"Security"`
+	} `xml:"Header"`
+	Body struct {
+		Text                 string `xml:",chardata"`
+		RequestSecurityToken struct {
+			Text      string `xml:",chardata"`
+			Wst       string `xml:"wst,attr"`
+			AppliesTo struct {
+				Text              string `xml:",chardata"`
+				Wsp               string `xml:"wsp,attr"`
+				EndpointReference struct {
+					Text    string `xml:",chardata"`
+					Address struct {
+						Text string `xml:",chardata"`
+					} `xml:"Address"`
+				} `xml:"EndpointReference"`
+			} `xml:"AppliesTo"`
+			KeyType struct {
+				Text string `xml:",chardata"`
+			} `xml:"KeyType"`
+			RequestType struct {
+				Text string `xml:",chardata"`
+			} `xml:"RequestType"`
+		} `xml:"RequestSecurityToken"`
+	} `xml:"Body"`
+}
+
+func buildTimeString(t time.Time) string {
+	// Golang time formats are weird: https://stackoverflow.com/questions/20234104/how-to-format-current-time-using-a-yyyymmddhhmmss-format
+	return t.Format("2006-01-02T15:04:05.000Z")
+}
+
+func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType, cloudAudienceURN string, username string, password string) (string, error) {
 	var soapAction string
 	var trustNamespace string
 	var keyType string
 	var requestType string
+
+	createdTime := time.Now().UTC()
+	expiresTime := createdTime.Add(10 * time.Minute)
 
 	if wte.endpointVersion == Trust2005 {
 		log.Println("Building WS-Trust token request for v2005")
@@ -42,7 +132,61 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType,
 		requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue"
 	}
 
-	return soapAction + trustNamespace + keyType + requestType
+	var envelope wsTrustTokenRequestEnvelope
+
+	messageUUID := uuid.NewV4()
+
+	envelope.S = "http://www.w3.org/2003/05/soap-envelope"
+	envelope.Wsa = "http://www.w3.org/2005/08/addressing"
+	envelope.Wsu = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+
+	envelope.Header.Action.MustUnderstand = "1"
+	envelope.Header.Action.Text = soapAction
+	envelope.Header.MessageID.Text = "urn:uuid:" + messageUUID.String()
+	envelope.Header.ReplyTo.Address.Text = "http://www.w3.org/2005/08/addressing/anonymous"
+	envelope.Header.To.MustUnderstand = "1"
+	envelope.Header.To.Text = wte.url
+
+	// note: uuid on golang: https://stackoverflow.com/questions/15130321/is-there-a-method-to-generate-a-uuid-with-go-language
+	// using "github.com/twinj/uuid"
+
+	if authType == UsernamePassword {
+
+		endpointUUID := uuid.NewV4()
+
+		var trustID string
+		if wte.endpointVersion == Trust2005 {
+			trustID = "UnPwSecTok2005-" + endpointUUID.String()
+		} else {
+			trustID = "UnPwSecTok13-" + endpointUUID.String()
+		}
+
+		envelope.Header.Security.MustUnderstand = "1"
+		envelope.Header.Security.Wsse = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+		envelope.Header.Security.Timestamp.ID = "MSATimeStamp"
+		envelope.Header.Security.Timestamp.Created.Text = buildTimeString(createdTime)
+		envelope.Header.Security.Timestamp.Expires.Text = buildTimeString(expiresTime)
+		envelope.Header.Security.UsernameToken.ID = trustID
+		envelope.Header.Security.UsernameToken.Username.Text = username
+		envelope.Header.Security.UsernameToken.Password.Text = password
+	}
+
+	envelope.Body.RequestSecurityToken.Wst = trustNamespace
+	envelope.Body.RequestSecurityToken.AppliesTo.Wsp = "http://schemas.xmlsoap.org/ws/2004/09/policy"
+	envelope.Body.RequestSecurityToken.AppliesTo.EndpointReference.Address.Text = cloudAudienceURN
+	envelope.Body.RequestSecurityToken.KeyType.Text = keyType
+	envelope.Body.RequestSecurityToken.RequestType.Text = requestType
+
+	output, err := xml.Marshal(envelope)
+	if err != nil {
+		return "", err
+	}
+
+	log.Println(string(output))
+
+	return string(output), nil
+
+	// return "", soapAction + trustNamespace + keyType + requestType
 
 	// pugi::xml_document doc;
 	// {
@@ -107,11 +251,11 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType,
 	// return docStream.str();
 }
 
-func (wte *WsTrustEndpoint) BuildTokenRequestMessageWIA(cloudAudienceURN string) string {
+func (wte *WsTrustEndpoint) BuildTokenRequestMessageWIA(cloudAudienceURN string) (string, error) {
 	return wte.buildTokenRequestMessage(WindowsIntegratedAuth, cloudAudienceURN, "", "")
 }
 
-func (wte *WsTrustEndpoint) BuildTokenRequestMessageUsernamePassword(cloudAudienceURN string, username string, password string) string {
+func (wte *WsTrustEndpoint) BuildTokenRequestMessageUsernamePassword(cloudAudienceURN string, username string, password string) (string, error) {
 	return wte.buildTokenRequestMessage(UsernamePassword, cloudAudienceURN, username, password)
 }
 

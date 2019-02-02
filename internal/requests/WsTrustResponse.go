@@ -10,6 +10,8 @@ type WsTrustResponse struct {
 }
 
 func CreateWsTrustResponse(responseData string) *WsTrustResponse {
+	log.Println("CreateWsTrustResponse ENTERED")
+	log.Println(responseData)
 	response := &WsTrustResponse{responseData}
 	return response
 
