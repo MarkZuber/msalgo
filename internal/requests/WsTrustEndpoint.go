@@ -29,79 +29,79 @@ func (wte *WsTrustEndpoint) GetVersion() WsTrustEndpointVersion {
 }
 
 type wsTrustTokenRequestEnvelope struct {
-	XMLName xml.Name `xml:"Envelope"`
+	XMLName xml.Name `xml:"s:Envelope"`
 	Text    string   `xml:",chardata"`
-	S       string   `xml:"s,attr"`
-	Wsa     string   `xml:"wsa,attr"`
-	Wsu     string   `xml:"wsu,attr"`
+	S       string   `xml:"xmlns:s,attr"`
+	Wsa     string   `xml:"xmlns:wsa,attr"`
+	Wsu     string   `xml:"xmlns:wsu,attr"`
 	Header  struct {
 		Text   string `xml:",chardata"`
 		Action struct {
 			Text           string `xml:",chardata"`
-			MustUnderstand string `xml:"mustUnderstand,attr"`
-		} `xml:"Action"`
+			MustUnderstand string `xml:"s:mustUnderstand,attr"`
+		} `xml:"wsa:Action"`
 		MessageID struct {
 			Text string `xml:",chardata"`
-		} `xml:"messageID"`
+		} `xml:"wsa:messageID"`
 		ReplyTo struct {
 			Text    string `xml:",chardata"`
 			Address struct {
 				Text string `xml:",chardata"`
-			} `xml:"Address"`
-		} `xml:"ReplyTo"`
+			} `xml:"wsa:Address"`
+		} `xml:"wsa:ReplyTo"`
 		To struct {
 			Text           string `xml:",chardata"`
-			MustUnderstand string `xml:"mustUnderstand,attr"`
-		} `xml:"To"`
+			MustUnderstand string `xml:"s:mustUnderstand,attr"`
+		} `xml:"wsa:To"`
 		Security struct {
 			Text           string `xml:",chardata"`
-			MustUnderstand string `xml:"mustUnderstand,attr"`
-			Wsse           string `xml:"wsse,attr"`
+			MustUnderstand string `xml:"s:mustUnderstand,attr"`
+			Wsse           string `xml:"xmlns:wsse,attr"`
 			Timestamp      struct {
 				Text    string `xml:",chardata"`
-				ID      string `xml:"Id,attr"`
+				ID      string `xml:"wsu:Id,attr"`
 				Created struct {
 					Text string `xml:",chardata"`
-				} `xml:"Created"`
+				} `xml:"wsu:Created"`
 				Expires struct {
 					Text string `xml:",chardata"`
-				} `xml:"Expires"`
-			} `xml:"Timestamp"`
+				} `xml:"wsu:Expires"`
+			} `xml:"wsu:Timestamp"`
 			UsernameToken struct {
 				Text     string `xml:",chardata"`
-				ID       string `xml:"Id,attr"`
+				ID       string `xml:"wsu:Id,attr"`
 				Username struct {
 					Text string `xml:",chardata"`
-				} `xml:"Username"`
+				} `xml:"wsse:Username"`
 				Password struct {
 					Text string `xml:",chardata"`
-				} `xml:"Password"`
-			} `xml:"UsernameToken"`
-		} `xml:"Security"`
-	} `xml:"Header"`
+				} `xml:"wsse:Password"`
+			} `xml:"wsse:UsernameToken"`
+		} `xml:"wsse:Security"`
+	} `xml:"s:Header"`
 	Body struct {
 		Text                 string `xml:",chardata"`
 		RequestSecurityToken struct {
 			Text      string `xml:",chardata"`
-			Wst       string `xml:"wst,attr"`
+			Wst       string `xml:"xmlns:wst,attr"`
 			AppliesTo struct {
 				Text              string `xml:",chardata"`
-				Wsp               string `xml:"wsp,attr"`
+				Wsp               string `xml:"xmlns:wsp,attr"`
 				EndpointReference struct {
 					Text    string `xml:",chardata"`
 					Address struct {
 						Text string `xml:",chardata"`
-					} `xml:"Address"`
-				} `xml:"EndpointReference"`
-			} `xml:"AppliesTo"`
+					} `xml:"wsa:Address"`
+				} `xml:"wsa:EndpointReference"`
+			} `xml:"wsp:AppliesTo"`
 			KeyType struct {
 				Text string `xml:",chardata"`
-			} `xml:"KeyType"`
+			} `xml:"wst:KeyType"`
 			RequestType struct {
 				Text string `xml:",chardata"`
-			} `xml:"RequestType"`
-		} `xml:"RequestSecurityToken"`
-	} `xml:"Body"`
+			} `xml:"wst:RequestType"`
+		} `xml:"wst:RequestSecurityToken"`
+	} `xml:"s:Body"`
 }
 
 func buildTimeString(t time.Time) string {
@@ -185,70 +185,6 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType,
 	log.Println(string(output))
 
 	return string(output), nil
-
-	// return "", soapAction + trustNamespace + keyType + requestType
-
-	// pugi::xml_document doc;
-	// {
-	//     pugi::xml_node envelope = doc.append_child("s:Envelope");
-	//     envelope.append_attribute("xmlns:s") = "http://www.w3.org/2003/05/soap-envelope";
-	//     envelope.append_attribute("xmlns:wsa") = "http://www.w3.org/2005/08/addressing";
-	//     envelope.append_attribute("xmlns:wsu") =
-	//         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-	//     {
-	//         pugi::xml_node header = envelope.append_child("s:Header");
-	//         {
-	//             pugi::xml_node action = header.append_child("wsa:Action");
-	//             action.append_attribute("s:mustUnderstand") = 1;
-	//             action.text().set(soapAction);
-	//         }
-	//         {
-	//             header.append_child("wsa:messageID").text() = ("urn:uuid:" + xg::newGuid().str()).c_str();
-	//         }
-	//         {
-	//             pugi::xml_node replyTo = header.append_child("wsa:ReplyTo");
-	//             {
-	//                 replyTo.append_child("wsa:Address").text() = "http://www.w3.org/2005/08/addressing/anonymous";
-	//             }
-	//         }
-	//         {
-	//             pugi::xml_node to = header.append_child("wsa:To");
-	//             to.append_attribute("s:mustUnderstand") = 1;
-	//             to.text().set(_url.c_str());
-	//         }
-	//         if (authType == AuthorizationType::UsernamePassword)
-	//         {
-	//             AppendSecurityHeader(header, username, password);
-	//         }
-	//     }
-	//     {
-	//         pugi::xml_node body = envelope.append_child("s:Body");
-	//         {
-	//             pugi::xml_node requestSecurityToken = body.append_child("wst:RequestSecurityToken");
-	//             requestSecurityToken.append_attribute("xmlns:wst") = trustNamespace;
-	//             {
-	//                 pugi::xml_node appliesTo = requestSecurityToken.append_child("wsp:AppliesTo");
-	//                 appliesTo.append_attribute("xmlns:wsp") = "http://schemas.xmlsoap.org/ws/2004/09/policy";
-	//                 {
-	//                     pugi::xml_node endpointReference = appliesTo.append_child("wsa:EndpointReference");
-	//                     {
-	//                         endpointReference.append_child("wsa:Address").text() = cloudAudienceUrn.c_str();
-	//                     }
-	//                 }
-	//             }
-	//             {
-	//                 requestSecurityToken.append_child("wst:KeyType").text() = keyType;
-	//             }
-	//             {
-	//                 requestSecurityToken.append_child("wst:RequestType").text() = requestType;
-	//             }
-	//         }
-	//     }
-	// }
-
-	// stringstream docStream;
-	// doc.save(docStream, "  ", pugi::format_default | pugi::format_no_declaration);
-	// return docStream.str();
 }
 
 func (wte *WsTrustEndpoint) BuildTokenRequestMessageWIA(cloudAudienceURN string) (string, error) {
