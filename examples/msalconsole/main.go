@@ -10,7 +10,7 @@ import (
 func main() {
 
 	log.Println("creating pca")
-	pca, err := msalgo.CreatePublicClientApplicationBuilder("the-client-id").Build()
+	pca, err := msalgo.CreatePublicClientApplicationBuilder("0615b6ca-88d4-4884-8729-b178178f7c27").Build()
 	if err != nil {
 		log.Fatal(err)
 	}

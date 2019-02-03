@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/markzuber/msalgo/pkg/parameters"
 
@@ -164,7 +165,7 @@ func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthP
 	addClientIdQueryParam(decodedQueryParams, authParameters)
 	addScopeQueryParam(decodedQueryParams, authParameters)
 
-	deviceCodeEndpoint := authParameters.GetAuthorityEndpoints().GetTokenEndpoint()
+	deviceCodeEndpoint := strings.Replace(authParameters.GetAuthorityEndpoints().GetTokenEndpoint(), "token", "devicecode", -1)
 
 	headers := getAadHeaders(authParameters)
 	addContentTypeHeader(headers, UrlEncodedUtf8)
@@ -200,11 +201,7 @@ func addClientIdQueryParam(queryParams map[string]string, authParameters *msalba
 }
 
 func joinScopes(scopes []string) string {
-	var buffer bytes.Buffer
-	for _, scope := range scopes {
-		buffer.WriteString(scope)
-	}
-	return buffer.String()
+	return strings.Join(scopes[:], " ")
 }
 
 func addScopeQueryParam(queryParams map[string]string, authParameters *msalbase.AuthParametersInternal) {
@@ -253,18 +250,22 @@ func getAadHeaders(authParameters *msalbase.AuthParametersInternal) map[string]s
 func encodeQueryParameters(queryParameters map[string]string) string {
 	var buffer bytes.Buffer
 
+	log.Println("encodeQueryParameters...")
+
 	first := true
 	for k, v := range queryParameters {
 		if !first {
 			buffer.WriteString("&")
-			first = false
 		}
+		first = false
 		buffer.WriteString(url.QueryEscape(k))
 		buffer.WriteString("=")
 		buffer.WriteString(url.QueryEscape(v))
 	}
 
-	return buffer.String()
+	result := buffer.String()
+	log.Println(result)
+	return result
 }
 
 func (wrm *WebRequestManager) exchangeGrantForToken(authParameters *msalbase.AuthParametersInternal, queryParams map[string]string) (*msalbase.TokenResponse, error) {

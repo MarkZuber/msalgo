@@ -13,5 +13,6 @@ func (endpoints *AuthorityEndpoints) GetUserRealmEndpoint(username string) strin
 }
 
 func (endpoints *AuthorityEndpoints) GetTokenEndpoint() string {
-	return "todo: implement returning the token endpoint"
+	// todo: implement this stuff for real
+	return "https://login.microsoftonline.com/organizations/oauth2/token"
 }
