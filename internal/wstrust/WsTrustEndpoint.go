@@ -1,10 +1,11 @@
-package requests
+package wstrust
 
 import (
 	"encoding/xml"
 	"log"
 	"time"
 
+	"github.com/markzuber/msalgo/internal/msalbase"
 	uuid "github.com/twinj/uuid"
 )
 
@@ -109,7 +110,7 @@ func buildTimeString(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05.000Z")
 }
 
-func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType, cloudAudienceURN string, username string, password string) (string, error) {
+func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.AuthorizationType, cloudAudienceURN string, username string, password string) (string, error) {
 	var soapAction string
 	var trustNamespace string
 	var keyType string
@@ -150,7 +151,7 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType,
 	// note: uuid on golang: https://stackoverflow.com/questions/15130321/is-there-a-method-to-generate-a-uuid-with-go-language
 	// using "github.com/twinj/uuid"
 
-	if authType == UsernamePassword {
+	if authType == msalbase.UsernamePassword {
 
 		endpointUUID := uuid.NewV4()
 
@@ -188,11 +189,11 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType AuthorizationType,
 }
 
 func (wte *WsTrustEndpoint) BuildTokenRequestMessageWIA(cloudAudienceURN string) (string, error) {
-	return wte.buildTokenRequestMessage(WindowsIntegratedAuth, cloudAudienceURN, "", "")
+	return wte.buildTokenRequestMessage(msalbase.WindowsIntegratedAuth, cloudAudienceURN, "", "")
 }
 
 func (wte *WsTrustEndpoint) BuildTokenRequestMessageUsernamePassword(cloudAudienceURN string, username string, password string) (string, error) {
-	return wte.buildTokenRequestMessage(UsernamePassword, cloudAudienceURN, username, password)
+	return wte.buildTokenRequestMessage(msalbase.UsernamePassword, cloudAudienceURN, username, password)
 }
 
 func (wte *WsTrustEndpoint) GetURL() string {

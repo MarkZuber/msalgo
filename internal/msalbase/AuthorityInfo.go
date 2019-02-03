@@ -1,4 +1,4 @@
-package requests
+package msalbase
 
 type AuthorityInfo struct {
 	authorityURI string

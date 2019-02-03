@@ -3,24 +3,26 @@ package requests
 import (
 	"errors"
 	"log"
+
+	"github.com/markzuber/msalgo/internal/msalbase"
 )
 
 // UsernamePasswordRequest stuff
 type UsernamePasswordRequest struct {
 	webRequestManager IWebRequestManager
-	authParameters    *AuthParametersInternal
+	authParameters    *msalbase.AuthParametersInternal
 }
 
 // CreateUsernamePasswordRequest stuff
 func CreateUsernamePasswordRequest(
 	webRequestManager IWebRequestManager,
-	authParameters *AuthParametersInternal) *UsernamePasswordRequest {
+	authParameters *msalbase.AuthParametersInternal) *UsernamePasswordRequest {
 	req := &UsernamePasswordRequest{webRequestManager, authParameters}
 	return req
 }
 
 // Execute stuff
-func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
+func (req *UsernamePasswordRequest) Execute() (*msalbase.TokenResponse, error) {
 	userRealm, err := req.webRequestManager.GetUserRealm(req.authParameters)
 	if err != nil {
 		return nil, err
@@ -29,7 +31,7 @@ func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
 	log.Println("got user realm")
 
 	switch accountType := userRealm.GetAccountType(); accountType {
-	case Federated:
+	case msalbase.Federated:
 		log.Println("FEDERATED")
 		if mexDoc, err := req.webRequestManager.GetMex(userRealm.GetFederationMetadataURL()); err == nil {
 			wsTrustEndpoint := mexDoc.GetWsTrustUsernamePasswordEndpoint()
@@ -41,7 +43,7 @@ func (req *UsernamePasswordRequest) Execute() (*TokenResponse, error) {
 		}
 		// todo: check for ui interaction in api result...
 		return nil, err
-	case Managed:
+	case msalbase.Managed:
 		log.Println("MANAGED")
 		return req.webRequestManager.GetAccessTokenFromUsernamePassword(req.authParameters)
 	default:

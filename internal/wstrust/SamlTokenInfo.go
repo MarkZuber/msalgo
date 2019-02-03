@@ -1,4 +1,4 @@
-package requests
+package wstrust
 
 type SamlAssertionType int
 

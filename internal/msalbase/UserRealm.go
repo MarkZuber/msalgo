@@ -1,4 +1,4 @@
-package requests
+package msalbase
 
 import (
 	"encoding/json"

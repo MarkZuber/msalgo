@@ -1,6 +1,6 @@
 package parameters
 
-import "github.com/markzuber/msalgo/internal/requests"
+import "github.com/markzuber/msalgo/internal/msalbase"
 
 // PublicClientApplicationParameters stuff
 type PublicClientApplicationParameters struct {
@@ -12,6 +12,6 @@ func CreatePublicClientApplicationParameters() *PublicClientApplicationParameter
 	return p
 }
 
-func (p *PublicClientApplicationParameters) AugmentAuthParametersInternal(authParams *requests.AuthParametersInternal) {
+func (p *PublicClientApplicationParameters) AugmentAuthParametersInternal(authParams *msalbase.AuthParametersInternal) {
 
 }
