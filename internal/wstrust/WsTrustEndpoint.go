@@ -121,13 +121,13 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 
 	if wte.endpointVersion == Trust2005 {
 		log.Println("Building WS-Trust token request for v2005")
-		soapAction = Trust2005Spec
+		soapAction = trust2005Spec
 		trustNamespace = "http://schemas.xmlsoap.org/ws/2005/02/trust"
 		keyType = "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey"
 		requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue"
 	} else {
 		log.Println("Building WS-Trust token request for v1.3")
-		soapAction = Trust13Spec
+		soapAction = trust13Spec
 		trustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512"
 		keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"
 		requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue"

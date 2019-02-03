@@ -43,6 +43,20 @@ func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(
 	return nil, err
 }
 
+func (pca *PublicClientApplication) AcquireTokenByDeviceCode(
+	deviceCodeParameters *parameters.AcquireTokenDeviceCodeParameters) (*AuthenticationResult, error) {
+	authParams := createAuthParametersInternal(pca.commonParameters, deviceCodeParameters.GetCommonParameters())
+	pca.pcaParameters.AugmentAuthParametersInternal(authParams)
+	authParams.SetAuthorizationType(msalbase.DeviceCode)
+	deviceCodeParameters.AugmentAuthParametersInternal(authParams)
+	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, authParams)
+	tokenResponse, err := req.Execute()
+	if err == nil {
+		return createAuthenticationResult(tokenResponse), nil
+	}
+	return nil, err
+}
+
 func createAuthParametersInternal(
 	applicationCommonParameters *parameters.ApplicationCommonParameters,
 	commonParameters *parameters.AcquireTokenCommonParameters) *msalbase.AuthParametersInternal {

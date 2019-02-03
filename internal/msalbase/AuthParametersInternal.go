@@ -9,6 +9,7 @@ const (
 	AuthCode
 	Interactive
 	Certificate
+	DeviceCode
 )
 
 type AuthParametersInternal struct {

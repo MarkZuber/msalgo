@@ -2,10 +2,10 @@ package parameters
 
 // AcquireTokenCommonParameters stuff
 type AcquireTokenCommonParameters struct {
-	scopes string // todo: obviously need this to be a ScopeSet custom struct or at least a collection
+	scopes []string
 }
 
-func createAcquireTokenCommonParameters(scopes string) *AcquireTokenCommonParameters {
+func createAcquireTokenCommonParameters(scopes []string) *AcquireTokenCommonParameters {
 	p := &AcquireTokenCommonParameters{
 		scopes: scopes,
 	}

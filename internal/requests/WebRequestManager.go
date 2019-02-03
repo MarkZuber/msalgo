@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/url"
 
+	"github.com/markzuber/msalgo/pkg/parameters"
+
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/wstrust"
 )
@@ -13,6 +15,11 @@ import (
 // WebRequestManager stuff
 type WebRequestManager struct {
 	httpManager *msalbase.HTTPManager
+}
+
+func isErrorAuthorizationPending(err error) bool {
+	// todo: implement me!
+	return false
 }
 
 type ContentType int
@@ -121,7 +128,7 @@ func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *msalba
 		decodedQueryParams["grant_type"] = "urn:ietf:params:oauth:grant-type:saml2-bearer"
 		break
 	default:
-		return nil, errors.New("GetAccessTokenFromSamlGrant returned unknown saml assertion type")
+		return nil, errors.New("GetAccessTokenFromSamlGrant returned unknown saml assertion type: " + string(samlGrant.GetAssertionType()))
 		// MSAL_THROW(
 		//     UNTAGGED,
 		//     Status::Unexpected,
@@ -151,6 +158,43 @@ func (wrm *WebRequestManager) GetAccessTokenFromUsernamePassword(authParameters 
 	return wrm.exchangeGrantForToken(authParameters, decodedQueryParams)
 }
 
+func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*parameters.DeviceCodeResult, error) {
+	decodedQueryParams := map[string]string{}
+
+	addClientIdQueryParam(decodedQueryParams, authParameters)
+	addScopeQueryParam(decodedQueryParams, authParameters)
+
+	deviceCodeEndpoint := authParameters.GetAuthorityEndpoints().GetTokenEndpoint()
+
+	headers := getAadHeaders(authParameters)
+	addContentTypeHeader(headers, UrlEncodedUtf8)
+
+	response, err := wrm.httpManager.Post(
+		deviceCodeEndpoint, encodeQueryParameters(decodedQueryParams), headers)
+	if err != nil {
+		return nil, err
+	}
+	dcResponse, err := createDeviceCodeResponse(response.GetResponseData())
+	if err != nil {
+		return nil, err
+	}
+
+	return dcResponse.toDeviceCodeResult(authParameters.GetClientID(), authParameters.GetRequestedScopes()), nil
+}
+
+func (wrm *WebRequestManager) GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *parameters.DeviceCodeResult) (*msalbase.TokenResponse, error) {
+	decodedQueryParams := map[string]string{
+		"grant_type":  "device_code",
+		"device_code": deviceCodeResult.GetDeviceCode(),
+	}
+
+	addClientIdQueryParam(decodedQueryParams, authParameters)
+	addClientInfoQueryParam(decodedQueryParams)
+	addScopeQueryParam(decodedQueryParams, authParameters)
+
+	return wrm.exchangeGrantForToken(authParameters, decodedQueryParams)
+}
+
 func addClientIdQueryParam(queryParams map[string]string, authParameters *msalbase.AuthParametersInternal) {
 	queryParams["client_id"] = authParameters.GetClientID()
 }
@@ -164,7 +208,7 @@ func joinScopes(scopes []string) string {
 }
 
 func addScopeQueryParam(queryParams map[string]string, authParameters *msalbase.AuthParametersInternal) {
-	// MSAL_DEBUG("Adding scopes 'openid', 'offline_access', 'profile'");
+	log.Println("Adding scopes 'openid', 'offline_access', 'profile'")
 	requestedScopes := authParameters.GetRequestedScopes()
 
 	// openid equired to get an id token

@@ -3,6 +3,7 @@ package requests
 import (
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/wstrust"
+	"github.com/markzuber/msalgo/pkg/parameters"
 )
 
 // IWebRequestManager interface
@@ -15,4 +16,6 @@ type IWebRequestManager interface {
 	GetAccessTokenFromAuthCode(authParameters *msalbase.AuthParametersInternal, authCode string) (*msalbase.TokenResponse, error)
 	GetAccessTokenFromRefreshToken(authParameters *msalbase.AuthParametersInternal, refreshToken string) (*msalbase.TokenResponse, error)
 	GetAccessTokenWithCertificate(authParameters *msalbase.AuthParametersInternal, certificate *msalbase.ClientCertificate) (*msalbase.TokenResponse, error)
+	GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*parameters.DeviceCodeResult, error)
+	GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *parameters.DeviceCodeResult) (*msalbase.TokenResponse, error)
 }

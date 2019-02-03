@@ -10,7 +10,7 @@ type AcquireTokenUsernamePasswordParameters struct {
 }
 
 // CreateAcquireTokenUsernamePasswordParameters stuff
-func CreateAcquireTokenUsernamePasswordParameters(scopes string, username string, password string) *AcquireTokenUsernamePasswordParameters {
+func CreateAcquireTokenUsernamePasswordParameters(scopes []string, username string, password string) *AcquireTokenUsernamePasswordParameters {
 	p := &AcquireTokenUsernamePasswordParameters{
 		commonParameters: createAcquireTokenCommonParameters(scopes),
 		username:         username,
