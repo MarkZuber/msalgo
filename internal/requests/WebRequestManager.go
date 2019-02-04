@@ -273,7 +273,7 @@ func (wrm *WebRequestManager) exchangeGrantForToken(authParameters *msalbase.Aut
 	addContentTypeHeader(headers, UrlEncodedUtf8)
 
 	response, err := wrm.httpManager.Post(
-		authParameters.GetAuthorityInfo().GetTokenEndpoint(), encodeQueryParameters(queryParams), headers)
+		authParameters.GetAuthorityEndpoints().GetTokenEndpoint(), encodeQueryParameters(queryParams), headers)
 	if err != nil {
 		return nil, err
 	}
@@ -325,4 +325,12 @@ func (wrm *WebRequestManager) GetAccessTokenWithCertificate(authParameters *msal
 func (wrm *WebRequestManager) getAadHeaders(authParameters *msalbase.AuthParametersInternal) map[string]string {
 	headers := make(map[string]string)
 	return headers
+}
+
+func (wrm *WebRequestManager) GetAadinstanceDiscoveryResponse(authorityInfo *msalbase.AuthorityInfo) (*instanceDiscoveryResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (wrm *WebRequestManager) GetTenantDiscoveryResponse(openIdConfigurationEndpoint string) (*tenantDiscoveryResponse, error) {
+	return nil, errors.New("not implemented")
 }

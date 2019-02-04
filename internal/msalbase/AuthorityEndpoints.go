@@ -6,6 +6,13 @@ import (
 )
 
 type AuthorityEndpoints struct {
+	authorizationEndpoint string
+	tokenEndpoint         string
+	selfSignedJwtAudience string
+}
+
+func CreateAuthorityEndpoints(authorizationEndpoint string, tokenEndpoint string, selfSignedJwtAudience string) *AuthorityEndpoints {
+	return &AuthorityEndpoints{authorizationEndpoint, tokenEndpoint, selfSignedJwtAudience}
 }
 
 func (endpoints *AuthorityEndpoints) GetUserRealmEndpoint(username string) string {
