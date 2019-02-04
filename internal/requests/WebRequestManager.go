@@ -180,7 +180,7 @@ func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthP
 		return nil, err
 	}
 
-	return dcResponse.toDeviceCodeResult(authParameters.GetClientID(), authParameters.GetRequestedScopes()), nil
+	return dcResponse.toDeviceCodeResult(authParameters.GetClientID(), authParameters.GetScopes()), nil
 }
 
 func (wrm *WebRequestManager) GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *parameters.DeviceCodeResult) (*msalbase.TokenResponse, error) {
@@ -206,7 +206,7 @@ func joinScopes(scopes []string) string {
 
 func addScopeQueryParam(queryParams map[string]string, authParameters *msalbase.AuthParametersInternal) {
 	log.Println("Adding scopes 'openid', 'offline_access', 'profile'")
-	requestedScopes := authParameters.GetRequestedScopes()
+	requestedScopes := authParameters.GetScopes()
 
 	// openid equired to get an id token
 	// offline_access required to get a refresh token

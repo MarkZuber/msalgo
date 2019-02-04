@@ -3,38 +3,35 @@ package msalgo
 import (
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/requests"
-	"github.com/markzuber/msalgo/pkg/parameters"
 )
 
 // PublicClientApplication is used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
 // public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only
 // (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
 type PublicClientApplication struct {
-	commonParameters  *parameters.ApplicationCommonParameters
-	pcaParameters     *parameters.PublicClientApplicationParameters
+	pcaParameters     *PublicClientApplicationParameters
 	webRequestManager requests.IWebRequestManager
 }
 
-func createPublicClientApplication(builder *PublicClientApplicationBuilder) *PublicClientApplication {
+func CreatePublicClientApplication(pcaParameters *PublicClientApplicationParameters) (*PublicClientApplication, error) {
+	err := pcaParameters.validate()
+	if err != nil {
+		return nil, err
+	}
 
 	httpManager := msalbase.CreateHTTPManager()
 	webRequestManager := requests.CreateWebRequestManager(httpManager)
 
-	pca := &PublicClientApplication{
-		commonParameters:  builder.commonParameters,
-		pcaParameters:     builder.pcaParameters,
-		webRequestManager: webRequestManager,
-	}
-	return pca
+	pca := &PublicClientApplication{pcaParameters, webRequestManager}
+	return pca, nil
 }
 
 // AcquireTokenByUsernamePassword is a non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(
-	usernamePasswordParameters *parameters.AcquireTokenUsernamePasswordParameters) (*AuthenticationResult, error) {
-	authParams := createAuthParametersInternal(pca.commonParameters, usernamePasswordParameters.GetCommonParameters())
-	pca.pcaParameters.AugmentAuthParametersInternal(authParams)
-	authParams.SetAuthorizationType(msalbase.UsernamePassword)
-	usernamePasswordParameters.AugmentAuthParametersInternal(authParams)
+func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(usernamePasswordParameters *AcquireTokenUsernamePasswordParameters) (*AuthenticationResult, error) {
+
+	authParams := pca.pcaParameters.createAuthenticationParameters()
+	usernamePasswordParameters.augmentAuthenticationParameters(authParams)
+
 	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
@@ -43,23 +40,14 @@ func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(
 	return nil, err
 }
 
-func (pca *PublicClientApplication) AcquireTokenByDeviceCode(
-	deviceCodeParameters *parameters.AcquireTokenDeviceCodeParameters) (*AuthenticationResult, error) {
-	authParams := createAuthParametersInternal(pca.commonParameters, deviceCodeParameters.GetCommonParameters())
-	pca.pcaParameters.AugmentAuthParametersInternal(authParams)
-	authParams.SetAuthorizationType(msalbase.DeviceCode)
-	deviceCodeParameters.AugmentAuthParametersInternal(authParams)
+func (pca *PublicClientApplication) AcquireTokenByDeviceCode(deviceCodeParameters *AcquireTokenDeviceCodeParameters) (*AuthenticationResult, error) {
+	authParams := pca.pcaParameters.createAuthenticationParameters()
+	deviceCodeParameters.augmentAuthenticationParameters(authParams)
+
 	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
 		return createAuthenticationResult(tokenResponse), nil
 	}
 	return nil, err
-}
-
-func createAuthParametersInternal(
-	applicationCommonParameters *parameters.ApplicationCommonParameters,
-	commonParameters *parameters.AcquireTokenCommonParameters) *msalbase.AuthParametersInternal {
-	authParams := msalbase.CreateAuthParametersInternal(applicationCommonParameters.GetClientID())
-	return authParams
 }

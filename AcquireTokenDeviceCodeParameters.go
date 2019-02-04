@@ -1,12 +1,10 @@
-package parameters
+package msalgo
 
 import "github.com/markzuber/msalgo/internal/msalbase"
 
 // AcquireTokenDeviceCodeParameters stuff
 type AcquireTokenDeviceCodeParameters struct {
-	commonParameters *AcquireTokenCommonParameters
-	username         string
-	password         string
+	commonParameters *acquireTokenCommonParameters
 }
 
 // CreateAcquireTokenDeviceCodeParameters stuff
@@ -17,9 +15,7 @@ func CreateAcquireTokenDeviceCodeParameters(scopes []string) *AcquireTokenDevice
 	return p
 }
 
-func (p *AcquireTokenDeviceCodeParameters) GetCommonParameters() *AcquireTokenCommonParameters {
-	return p.commonParameters
-}
-
-func (p *AcquireTokenDeviceCodeParameters) AugmentAuthParametersInternal(authParams *msalbase.AuthParametersInternal) {
+func (p *AcquireTokenDeviceCodeParameters) augmentAuthenticationParameters(authParams *msalbase.AuthParametersInternal) {
+	p.commonParameters.augmentAuthenticationParameters(authParams)
+	authParams.SetAuthorizationType(msalbase.DeviceCode)
 }

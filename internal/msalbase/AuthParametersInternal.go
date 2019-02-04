@@ -25,9 +25,17 @@ type AuthParametersInternal struct {
 	authorizationType AuthorizationType
 }
 
-func CreateAuthParametersInternal(clientID string) *AuthParametersInternal {
-	p := &AuthParametersInternal{clientID: clientID}
+func CreateAuthParametersInternal(clientID string, authorityInfo *AuthorityInfo) *AuthParametersInternal {
+	p := &AuthParametersInternal{clientID: clientID, authorityInfo: authorityInfo}
 	return p
+}
+
+func (ap *AuthParametersInternal) SetScopes(scopes []string) {
+	ap.scopes = scopes
+}
+
+func (ap *AuthParametersInternal) GetScopes() []string {
+	return ap.scopes
 }
 
 func (ap *AuthParametersInternal) GetClientID() string {
@@ -56,10 +64,6 @@ func (ap *AuthParametersInternal) GetPassword() string {
 
 func (ap *AuthParametersInternal) SetPassword(password string) {
 	ap.password = password
-}
-
-func (ap *AuthParametersInternal) GetRequestedScopes() []string {
-	return ap.scopes
 }
 
 func (ap *AuthParametersInternal) GetAuthorityInfo() *AuthorityInfo {

@@ -1,10 +1,10 @@
-package parameters
+package msalgo
 
 import "github.com/markzuber/msalgo/internal/msalbase"
 
 // AcquireTokenUsernamePasswordParameters stuff
 type AcquireTokenUsernamePasswordParameters struct {
-	commonParameters *AcquireTokenCommonParameters
+	commonParameters *acquireTokenCommonParameters
 	username         string
 	password         string
 }
@@ -37,11 +37,9 @@ func (p *AcquireTokenUsernamePasswordParameters) GetPassword() string {
 	return p.password
 }
 
-func (p *AcquireTokenUsernamePasswordParameters) GetCommonParameters() *AcquireTokenCommonParameters {
-	return p.commonParameters
-}
-
-func (p *AcquireTokenUsernamePasswordParameters) AugmentAuthParametersInternal(authParams *msalbase.AuthParametersInternal) {
+func (p *AcquireTokenUsernamePasswordParameters) augmentAuthenticationParameters(authParams *msalbase.AuthParametersInternal) {
+	p.commonParameters.augmentAuthenticationParameters(authParams)
+	authParams.SetAuthorizationType(msalbase.UsernamePassword)
 	authParams.SetUsername(p.GetUsername())
 	authParams.SetPassword(p.GetPassword())
 }
