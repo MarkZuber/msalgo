@@ -3,6 +3,7 @@ package msalgo
 import (
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/requests"
+	"github.com/markzuber/msalgo/internal/tokencache"
 )
 
 // PublicClientApplication is used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
@@ -11,6 +12,7 @@ import (
 type PublicClientApplication struct {
 	pcaParameters     *PublicClientApplicationParameters
 	webRequestManager requests.IWebRequestManager
+	storageManager    tokencache.IStorageManager
 }
 
 func CreatePublicClientApplication(pcaParameters *PublicClientApplicationParameters) (*PublicClientApplication, error) {
@@ -21,8 +23,9 @@ func CreatePublicClientApplication(pcaParameters *PublicClientApplicationParamet
 
 	httpManager := msalbase.CreateHTTPManager()
 	webRequestManager := requests.CreateWebRequestManager(httpManager)
+	storageManager := tokencache.CreateStorageManager()
 
-	pca := &PublicClientApplication{pcaParameters, webRequestManager}
+	pca := &PublicClientApplication{pcaParameters, webRequestManager, storageManager}
 	return pca, nil
 }
 
@@ -32,7 +35,9 @@ func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(usernamePassw
 	authParams := pca.pcaParameters.createAuthenticationParameters()
 	usernamePasswordParameters.augmentAuthenticationParameters(authParams)
 
-	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, authParams)
+	cacheManager := tokencache.CreateCacheManager(pca.storageManager, authParams)
+
+	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, cacheManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
 		return createAuthenticationResult(tokenResponse), nil
@@ -44,7 +49,9 @@ func (pca *PublicClientApplication) AcquireTokenByDeviceCode(deviceCodeParameter
 	authParams := pca.pcaParameters.createAuthenticationParameters()
 	deviceCodeParameters.augmentAuthenticationParameters(authParams)
 
-	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, authParams)
+	cacheManager := tokencache.CreateCacheManager(pca.storageManager, authParams)
+
+	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, cacheManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
 		return createAuthenticationResult(tokenResponse), nil

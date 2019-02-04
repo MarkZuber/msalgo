@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/markzuber/msalgo/pkg/parameters"
+	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type deviceCodeResponse struct {
@@ -52,7 +52,7 @@ func createDeviceCodeResponse(responseData string) (*deviceCodeResponse, error) 
 	return dcResponse, nil
 }
 
-func (dcr *deviceCodeResponse) toDeviceCodeResult(clientID string, scopes []string) *parameters.DeviceCodeResult {
+func (dcr *deviceCodeResponse) toDeviceCodeResult(clientID string, scopes []string) *contracts.DeviceCodeResult {
 	expiresOn := time.Now().UTC().Add(time.Duration(dcr.ExpiresIn) * time.Second)
-	return parameters.CreateDeviceCodeResult(dcr.UserCode, dcr.DeviceCode, dcr.VerificationURL, expiresOn, dcr.Interval, dcr.Message, clientID, scopes)
+	return contracts.CreateDeviceCodeResult(dcr.UserCode, dcr.DeviceCode, dcr.VerificationURL, expiresOn, dcr.Interval, dcr.Message, clientID, scopes)
 }

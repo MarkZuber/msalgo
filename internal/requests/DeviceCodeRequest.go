@@ -6,20 +6,23 @@ import (
 	"time"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
-	"github.com/markzuber/msalgo/pkg/parameters"
+	"github.com/markzuber/msalgo/internal/tokencache"
+	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 // DeviceCodeRequest stuff
 type DeviceCodeRequest struct {
 	webRequestManager IWebRequestManager
+	cacheManager      tokencache.ICacheManager
 	authParameters    *msalbase.AuthParametersInternal
 }
 
 // CreateDeviceCodeRequest stuff
 func CreateDeviceCodeRequest(
 	webRequestManager IWebRequestManager,
+	cacheManager tokencache.ICacheManager,
 	authParameters *msalbase.AuthParametersInternal) *DeviceCodeRequest {
-	req := &DeviceCodeRequest{webRequestManager, authParameters}
+	req := &DeviceCodeRequest{webRequestManager, cacheManager, authParameters}
 	return req
 }
 
@@ -39,7 +42,7 @@ func (req *DeviceCodeRequest) Execute() (*msalbase.TokenResponse, error) {
 	return req.waitForTokenResponse(deviceCodeResult)
 }
 
-func (req *DeviceCodeRequest) waitForTokenResponse(deviceCodeResult *parameters.DeviceCodeResult) (*msalbase.TokenResponse, error) {
+func (req *DeviceCodeRequest) waitForTokenResponse(deviceCodeResult *contracts.DeviceCodeResult) (*msalbase.TokenResponse, error) {
 
 	timeRemaining := deviceCodeResult.GetExpiresOn().Sub(time.Now().UTC())
 

@@ -7,10 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/markzuber/msalgo/pkg/parameters"
-
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/wstrust"
+	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 // WebRequestManager stuff
@@ -130,11 +129,6 @@ func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *msalba
 		break
 	default:
 		return nil, errors.New("GetAccessTokenFromSamlGrant returned unknown saml assertion type: " + string(samlGrant.GetAssertionType()))
-		// MSAL_THROW(
-		//     UNTAGGED,
-		//     Status::Unexpected,
-		//     "GetAccessTokenFromSamlGrant returned unknown saml assertion type: '%d'",
-		//     static_cast<int32_t>(samlGrant->GetAssertionType()));
 	}
 	// todo: decodedQueryParams["assertion"] = StringUtils::Base64RFCEncodePadded(samlGrant->GetAssertion());
 	addClientIdQueryParam(decodedQueryParams, authParameters)
@@ -145,7 +139,6 @@ func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *msalba
 }
 
 func (wrm *WebRequestManager) GetAccessTokenFromUsernamePassword(authParameters *msalbase.AuthParametersInternal) (*msalbase.TokenResponse, error) {
-
 	decodedQueryParams := map[string]string{
 		"grant_type": "password",
 		"username":   authParameters.GetUsername(),
@@ -159,7 +152,7 @@ func (wrm *WebRequestManager) GetAccessTokenFromUsernamePassword(authParameters 
 	return wrm.exchangeGrantForToken(authParameters, decodedQueryParams)
 }
 
-func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*parameters.DeviceCodeResult, error) {
+func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*contracts.DeviceCodeResult, error) {
 	decodedQueryParams := map[string]string{}
 
 	addClientIdQueryParam(decodedQueryParams, authParameters)
@@ -183,7 +176,7 @@ func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthP
 	return dcResponse.toDeviceCodeResult(authParameters.GetClientID(), authParameters.GetScopes()), nil
 }
 
-func (wrm *WebRequestManager) GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *parameters.DeviceCodeResult) (*msalbase.TokenResponse, error) {
+func (wrm *WebRequestManager) GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *contracts.DeviceCodeResult) (*msalbase.TokenResponse, error) {
 	decodedQueryParams := map[string]string{
 		"grant_type":  "device_code",
 		"device_code": deviceCodeResult.GetDeviceCode(),
