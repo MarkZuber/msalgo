@@ -29,13 +29,13 @@ func main() {
 		log.Println(result.GetAccessToken())
 	}
 
-	{
-		log.Println("acquiring token by username password")
-		userNameParams := msalgo.CreateAcquireTokenUsernamePasswordParameters([]string{"user.read"}, "mzuber@microsoft.com", "abc123")
-		result, err := pca.AcquireTokenByUsernamePassword(userNameParams)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(result.GetAccessToken())
-	}
+	// {
+	// 	log.Println("acquiring token by username password")
+	// 	userNameParams := msalgo.CreateAcquireTokenUsernamePasswordParameters([]string{"user.read"}, "mzuber@microsoft.com", "abc123")
+	// 	result, err := pca.AcquireTokenByUsernamePassword(userNameParams)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	log.Println(result.GetAccessToken())
+	// }
 }

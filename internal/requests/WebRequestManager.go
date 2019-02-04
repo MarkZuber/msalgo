@@ -272,8 +272,7 @@ func (wrm *WebRequestManager) exchangeGrantForToken(authParameters *msalbase.Aut
 	headers := getAadHeaders(authParameters)
 	addContentTypeHeader(headers, UrlEncodedUtf8)
 
-	response, err := wrm.httpManager.Post(
-		authParameters.GetAuthorityEndpoints().GetTokenEndpoint(), encodeQueryParameters(queryParams), headers)
+	response, err := wrm.httpManager.Post(authParameters.GetAuthorityEndpoints().GetTokenEndpoint(), encodeQueryParameters(queryParams), headers)
 	if err != nil {
 		return nil, err
 	}

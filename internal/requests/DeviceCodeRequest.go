@@ -46,6 +46,8 @@ func (req *DeviceCodeRequest) waitForTokenResponse(deviceCodeResult *parameters.
 	for timeRemaining.Seconds() > 0.0 {
 		// todo: how to check for cancellation requested...
 
+		// todo: learn more about go error handling so that this is managed through error flow and not parsing the token response...
+
 		tokenResponse, err := req.webRequestManager.GetAccessTokenFromDeviceCodeResult(req.authParameters, deviceCodeResult)
 		if err != nil {
 			if isErrorAuthorizationPending(err) {
@@ -54,8 +56,14 @@ func (req *DeviceCodeRequest) waitForTokenResponse(deviceCodeResult *parameters.
 				return nil, err
 			}
 		} else {
-			return tokenResponse, nil
+			if tokenResponse.IsAuthorizationPending() {
+				timeRemaining = deviceCodeResult.GetExpiresOn().Sub(time.Now().UTC())
+			} else {
+				return tokenResponse, nil
+			}
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	return nil, errors.New("Verification code expired before contacting the server")
