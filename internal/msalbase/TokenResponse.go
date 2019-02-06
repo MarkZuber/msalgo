@@ -12,8 +12,7 @@ type TokenResponse struct {
 	ErrorCodes       []int  `json:"error_codes"`
 	CorrelationID    string `json:"correlation_id"`
 	Claims           string `json:"claims"`
-
-	accessToken string
+	AccessToken      string `json:"access_token"`
 }
 
 func (tr *TokenResponse) IsAuthorizationPending() bool {
@@ -22,7 +21,7 @@ func (tr *TokenResponse) IsAuthorizationPending() bool {
 }
 
 func (tr *TokenResponse) GetAccessToken() string {
-	return tr.accessToken
+	return tr.AccessToken
 }
 
 func CreateTokenResponse(authParameters *AuthParametersInternal, responseData string) (*TokenResponse, error) {

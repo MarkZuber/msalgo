@@ -76,14 +76,14 @@ func createAuthorityInfo(authorityType AuthorityType, authorityURI string, valid
 	}
 
 	host := u.Hostname()
-	userRealmURIPrefix := fmt.Sprint("https://%v/common/userrealm/", host)
+	userRealmURIPrefix := fmt.Sprintf("https://%v/common/userrealm/", host)
 
 	tenant, err := getFirstPathSegment(u)
 	if err != nil {
 		return nil, err
 	}
 
-	canonicalAuthorityURI := fmt.Sprint("https://%v/%v/", host, tenant)
+	canonicalAuthorityURI := fmt.Sprintf("https://%v/%v/", host, tenant)
 
 	return &AuthorityInfo{host, canonicalAuthorityURI, authorityType, userRealmURIPrefix, validateAuthority, tenant}, nil
 }
