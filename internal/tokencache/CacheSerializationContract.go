@@ -3,10 +3,10 @@ package tokencache
 import "encoding/json"
 
 type cacheSerializationContract struct {
-	AccessTokens  map[string]*accessTokenCacheItem  `json:"AccessToken,omitempty"`
-	RefreshTokens map[string]*refreshTokenCacheItem `json:"RefreshToken,omitempty"`
-	IDTokens      map[string]*idTokenCacheItem      `json:"IdToken,omitempty"`
-	Accounts      map[string]*accountCacheItem      `json:"Account,omitempty"`
+	AccessTokens  map[string]*accessTokenCacheItem
+	RefreshTokens map[string]*refreshTokenCacheItem
+	IDTokens      map[string]*idTokenCacheItem
+	Accounts      map[string]*accountCacheItem
 }
 
 func createCacheSerializationContract() *cacheSerializationContract {

@@ -3,18 +3,18 @@ package tokencache
 import "encoding/json"
 
 type accessTokenCacheItem struct {
-	HomeAccountID                  string `json:"home_account_id,omitempty"`
-	Environment                    string `json:"environment,omitempty"`
-	RawClientInfo                  string `json:"raw_client_info,omitempty"`
-	CredentialType                 string `json:"credential_type,omitempty"`
-	ClientID                       string `json:"client_id,omitempty"`
-	Secret                         string `json:"secret,omitempty"`
-	Scopes                         string `json:"target,omitempty"`
-	TenantID                       string `json:"tenant_id,omitempty"`
-	ExpiresOnUnixTimestamp         string `json:"expires_on,omitempty"`
-	ExtendedExpiresOnUnixTimestamp string `json:"extended_expires_on,omitempty"`
-	CachedAt                       string `json:"cached_at,omitempty"`
-	UserAssertionHash              string `json:"user_assertion_hash,omitempty"`
+	HomeAccountID                  string
+	Environment                    string
+	RawClientInfo                  string
+	CredentialType                 string
+	ClientID                       string
+	Secret                         string
+	Scopes                         string
+	TenantID                       string
+	ExpiresOnUnixTimestamp         string
+	ExtendedExpiresOnUnixTimestamp string
+	CachedAt                       string
+	UserAssertionHash              string
 	AdditionalFields               map[string]interface{}
 }
 
