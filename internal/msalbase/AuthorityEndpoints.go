@@ -9,17 +9,21 @@ type AuthorityEndpoints struct {
 	authorizationEndpoint string
 	tokenEndpoint         string
 	selfSignedJwtAudience string
+	authorityHost         string
 }
 
-func CreateAuthorityEndpoints(authorizationEndpoint string, tokenEndpoint string, selfSignedJwtAudience string) *AuthorityEndpoints {
-	return &AuthorityEndpoints{authorizationEndpoint, tokenEndpoint, selfSignedJwtAudience}
+func CreateAuthorityEndpoints(authorizationEndpoint string, tokenEndpoint string, selfSignedJwtAudience string, authorityHost string) *AuthorityEndpoints {
+	return &AuthorityEndpoints{authorizationEndpoint, tokenEndpoint, selfSignedJwtAudience, authorityHost}
 }
 
 func (endpoints *AuthorityEndpoints) GetUserRealmEndpoint(username string) string {
-	return fmt.Sprintf("https://%s/common/UserRealm/%s?api-version=1.0", "login.microsoftonline.com", url.PathEscape(username))
+	return fmt.Sprintf("https://%s/common/UserRealm/%s?api-version=1.0", endpoints.authorityHost, url.PathEscape(username))
 }
 
 func (endpoints *AuthorityEndpoints) GetTokenEndpoint() string {
-	// todo: implement this stuff for real
-	return "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
+	return endpoints.tokenEndpoint
+}
+
+func (endpoints *AuthorityEndpoints) GetAuthorizationEndpoint() string {
+	return endpoints.authorizationEndpoint
 }

@@ -50,6 +50,10 @@ func (ap *AuthParametersInternal) GetAuthorityEndpoints() *AuthorityEndpoints {
 	return ap.endpoints
 }
 
+func (ap *AuthParametersInternal) SetAuthorityEndpoints(authorityEndpoints *AuthorityEndpoints) {
+	ap.endpoints = authorityEndpoints
+}
+
 func (ap *AuthParametersInternal) GetUsername() string {
 	return ap.username
 }

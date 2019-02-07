@@ -28,6 +28,11 @@ type AuthorityEndpointResolutionManager struct {
 	webRequestManager IWebRequestManager
 }
 
+func CreateAuthorityEndpointResolutionManager(webRequestManager IWebRequestManager) IAuthorityEndpointResolutionManager {
+	m := &AuthorityEndpointResolutionManager{webRequestManager}
+	return m
+}
+
 func getAdfsDomainFromUpn(userPrincipalName string) string {
 	// todo: func should return error so we can handle not having a @ in the string...
 	return strings.Split(userPrincipalName, "@")[1]
@@ -109,7 +114,8 @@ func (m *AuthorityEndpointResolutionManager) ResolveEndpoints(authorityInfo *msa
 	endpoints = msalbase.CreateAuthorityEndpoints(
 		strings.Replace(tenantDiscoveryResponse.AuthorizationEndpoint, "{tenant}", tenant, -1),
 		strings.Replace(tenantDiscoveryResponse.TokenEndpoint, "{tenant}", tenant, -1),
-		strings.Replace(tenantDiscoveryResponse.Issuer, "{tenant}", tenant, -1))
+		strings.Replace(tenantDiscoveryResponse.Issuer, "{tenant}", tenant, -1),
+		authorityInfo.GetHost())
 
 	m.addCachedEndpoints(authorityInfo, userPrincipalName, endpoints)
 	return endpoints, nil

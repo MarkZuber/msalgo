@@ -27,6 +27,15 @@ func CreateUsernamePasswordRequest(
 
 // Execute stuff
 func (req *UsernamePasswordRequest) Execute() (*msalbase.TokenResponse, error) {
+
+	resolutionManager := CreateAuthorityEndpointResolutionManager(req.webRequestManager)
+	endpoints, err := resolutionManager.ResolveEndpoints(req.authParameters.GetAuthorityInfo(), "")
+	if err != nil {
+		return nil, err
+	}
+
+	req.authParameters.SetAuthorityEndpoints(endpoints)
+
 	userRealm, err := req.webRequestManager.GetUserRealm(req.authParameters)
 	if err != nil {
 		return nil, err

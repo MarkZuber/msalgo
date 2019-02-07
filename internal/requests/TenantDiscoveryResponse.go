@@ -1,5 +1,7 @@
 package requests
 
+import "encoding/json"
+
 type tenantDiscoveryResponse struct {
 	Error            string `json:"error"`
 	SubError         string `json:"suberror"`
@@ -23,4 +25,13 @@ func (r *tenantDiscoveryResponse) HasTokenEndpoint() bool {
 
 func (r *tenantDiscoveryResponse) HasIssuer() bool {
 	return len(r.Issuer) > 0
+}
+
+func createTenantDiscoveryResponse(responseData string) (*tenantDiscoveryResponse, error) {
+	discoveryResponse := &tenantDiscoveryResponse{}
+	var err = json.Unmarshal([]byte(responseData), discoveryResponse)
+	if err != nil {
+		return nil, err
+	}
+	return discoveryResponse, nil
 }

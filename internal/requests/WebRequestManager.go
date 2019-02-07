@@ -3,6 +3,7 @@ package requests
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
 	"strings"
@@ -320,9 +321,43 @@ func (wrm *WebRequestManager) getAadHeaders(authParameters *msalbase.AuthParamet
 }
 
 func (wrm *WebRequestManager) GetAadinstanceDiscoveryResponse(authorityInfo *msalbase.AuthorityInfo) (*instanceDiscoveryResponse, error) {
-	return nil, errors.New("not implemented")
+
+	queryParams := map[string]string{
+		"api-version":            "1.1",
+		"authorization_endpoint": fmt.Sprintf("https://%v/%v/auth2/v2.0/authorize", authorityInfo.GetHost(), authorityInfo.Tenant()),
+	}
+
+	var discoveryHost string
+	if isInTrustedHostList(authorityInfo.GetHost()) {
+		discoveryHost = authorityInfo.GetHost()
+	} else {
+		discoveryHost = "login.microsoftonline.com"
+	}
+
+	instanceDiscoveryEndpoint := fmt.Sprintf("https://%v/common/discovery/instance?%v", discoveryHost, encodeQueryParameters(queryParams))
+
+	httpManagerResponse, err := wrm.httpManager.Get(instanceDiscoveryEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if httpManagerResponse.GetResponseCode() != 200 {
+		return nil, errors.New("invalid response code") // todo: need error struct here
+	}
+
+	return createInstanceDiscoveryResponse(httpManagerResponse.GetResponseData())
 }
 
 func (wrm *WebRequestManager) GetTenantDiscoveryResponse(openIdConfigurationEndpoint string) (*tenantDiscoveryResponse, error) {
-	return nil, errors.New("not implemented")
+
+	httpManagerResponse, err := wrm.httpManager.Get(openIdConfigurationEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if httpManagerResponse.GetResponseCode() != 200 {
+		return nil, errors.New("invalid response code") // todo: need error struct here
+	}
+
+	return createTenantDiscoveryResponse(httpManagerResponse.GetResponseData())
 }

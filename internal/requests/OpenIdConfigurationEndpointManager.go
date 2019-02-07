@@ -19,7 +19,15 @@ func createAadOpenIdConfigurationEndpointManager(aadInstanceDiscovery IAadInstan
 	return m
 }
 
-var aadTrustedHostList = map[string]bool{}
+var aadTrustedHostList = map[string]bool{
+	"login.windows.net":            true, // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list
+	"login.chinacloudapi.cn":       true, // Microsoft Azure China
+	"login.microsoftonline.de":     true, // Microsoft Azure Blackforest
+	"login-us.microsoftonline.com": true, // Microsoft Azure US Government - Legacy
+	"login.microsoftonline.us":     true, // Microsoft Azure US Government
+	"login.microsoftonline.com":    true, // Microsoft Azure Worldwide
+	"login.cloudgovapi.us":         true, // Microsoft Azure US Government
+}
 
 func isInTrustedHostList(host string) bool {
 	if _, ok := aadTrustedHostList[host]; ok {
