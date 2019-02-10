@@ -18,18 +18,16 @@ func CreateWsTrustResponse(responseData string) *WsTrustResponse {
 	response := &WsTrustResponse{responseData}
 	return response
 
+	// todo: return error here
 	// pugi::xml_parse_result result = _doc.load_string(response.c_str());
 	// if (!result)
 	// {
-	//     MSAL_THROW(UNTAGGED, Status::Unexpected, result.status, "Failed to parse SAML response '%s', response");
+	// "Failed to parse SAML response '%s', response");
 	// }
 
 	// auto fault = _doc.child("s:Envelope").child("s:Body").child("s:Fault");
 	// if (fault != nullptr)
 	// {
-	//     MSAL_THROW(
-	//         UNTAGGED,
-	//         Status::Unexpected,
 	//         "SAML assertion indicates error: Code '%s' Subcode '%s' Reason '%s'",
 	//         fault.child("s:Code").child_value("s:Value"),
 	//         fault.child("s:Code").child("s:Subcode").child_value("s:Value"),

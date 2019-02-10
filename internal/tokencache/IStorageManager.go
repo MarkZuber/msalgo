@@ -1,13 +1,8 @@
 package tokencache
 
-import "github.com/markzuber/msalgo/pkg/contracts"
-
-type CredentialType int
-
-const (
-	CredentialTypeOauth2RefreshToken CredentialType = iota
-	CredentialTypeOidcIdToken
-	CredentialTypeOther
+import (
+	"github.com/markzuber/msalgo/internal/msalbase"
+	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type OperationStatusType int
@@ -17,9 +12,6 @@ const (
 	OperationStatusTypeFailure
 	OperationStatusTypeRetriableError
 )
-
-type Credential struct {
-}
 
 type OperationStatus struct {
 	StatusType        OperationStatusType
@@ -41,7 +33,7 @@ type AppMetadata struct {
 }
 
 type ReadCredentialsResponse struct {
-	Credentials     []Credential
+	Credentials     []*msalbase.Credential
 	OperationStatus *OperationStatus
 }
 
@@ -64,9 +56,9 @@ type IStorageManager interface {
 		clientID string,
 		familyID string,
 		target string,
-		types map[CredentialType]bool) (*ReadCredentialsResponse, error)
+		types map[msalbase.CredentialType]bool) (*ReadCredentialsResponse, error)
 
-	WriteCredentials(correlationID string, credentials []Credential) (*OperationStatus, error)
+	WriteCredentials(correlationID string, credentials []*msalbase.Credential) (*OperationStatus, error)
 
 	DeleteCredentials(
 		correlationId string,
@@ -76,7 +68,7 @@ type IStorageManager interface {
 		clientID string,
 		familyID string,
 		target string,
-		types map[CredentialType]bool) (*OperationStatus, error)
+		types map[msalbase.CredentialType]bool) (*OperationStatus, error)
 
 	ReadAllAccounts(correlationID string) (*ReadAccountsResponse, error)
 

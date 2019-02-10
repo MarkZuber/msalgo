@@ -42,6 +42,7 @@ func getAdfsDomainFromUpn(userPrincipalName string) string {
 func (m *AuthorityEndpointResolutionManager) tryGetCachedEndpoints(authorityInfo *msalbase.AuthorityInfo, userPrincipalName string) *msalbase.AuthorityEndpoints {
 
 	if cacheEntry, ok := endpointCacheEntries[authorityInfo.GetCanonicalAuthorityURI()]; ok {
+		log.Infof("%#v", cacheEntry.Endpoints)
 		if authorityInfo.GetAuthorityType() == msalbase.AuthorityTypeAdfs {
 			if _, ok := cacheEntry.ValidForDomainsInList[getAdfsDomainFromUpn(userPrincipalName)]; ok {
 				return cacheEntry.Endpoints
@@ -86,17 +87,20 @@ func (m *AuthorityEndpointResolutionManager) ResolveEndpoints(authorityInfo *msa
 	log.Info("Resolving authority endpoints. No cached value.  Performing lookup.")
 	endpointManager, err := createOpenIdConfigurationEndpointManager(authorityInfo)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	openIDConfigurationEndpoint, err := endpointManager.getOpenIdConfigurationEndpoint(authorityInfo, userPrincipalName)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	// Discover endpoints via openid-configuration
 	tenantDiscoveryResponse, err := m.webRequestManager.GetTenantDiscoveryResponse(openIDConfigurationEndpoint)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -119,5 +123,8 @@ func (m *AuthorityEndpointResolutionManager) ResolveEndpoints(authorityInfo *msa
 		authorityInfo.GetHost())
 
 	m.addCachedEndpoints(authorityInfo, userPrincipalName, endpoints)
+
+	log.Infof("Endpoints: %#v", endpoints)
+
 	return endpoints, nil
 }

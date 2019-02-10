@@ -5,6 +5,7 @@ package tokencache
 import (
 	"errors"
 
+	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
@@ -24,11 +25,11 @@ func (m *macosStorageManager) ReadCredentials(
 	clientID string,
 	familyID string,
 	target string,
-	types map[CredentialType]bool) (*ReadCredentialsResponse, error) {
+	types map[msalbase.CredentialType]bool) (*ReadCredentialsResponse, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *macosStorageManager) WriteCredentials(correlationID string, credentials []Credential) (*OperationStatus, error) {
+func (m *macosStorageManager) WriteCredentials(correlationID string, credentials []*msalbase.Credential) (*OperationStatus, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -40,7 +41,7 @@ func (m *macosStorageManager) DeleteCredentials(
 	clientID string,
 	familyID string,
 	target string,
-	types map[CredentialType]bool) (*OperationStatus, error) {
+	types map[msalbase.CredentialType]bool) (*OperationStatus, error) {
 	return nil, errors.New("not implemented")
 }
 

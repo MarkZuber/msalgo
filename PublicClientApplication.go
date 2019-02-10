@@ -13,6 +13,7 @@ type PublicClientApplication struct {
 	pcaParameters     *PublicClientApplicationParameters
 	webRequestManager requests.IWebRequestManager
 	storageManager    tokencache.IStorageManager
+	cacheManager      tokencache.ICacheManager
 }
 
 func CreatePublicClientApplication(pcaParameters *PublicClientApplicationParameters) (*PublicClientApplication, error) {
@@ -24,8 +25,9 @@ func CreatePublicClientApplication(pcaParameters *PublicClientApplicationParamet
 	httpManager := msalbase.CreateHTTPManager()
 	webRequestManager := requests.CreateWebRequestManager(httpManager)
 	storageManager := tokencache.CreateStorageManager()
+	cacheManager := tokencache.CreateCacheManager(storageManager)
 
-	pca := &PublicClientApplication{pcaParameters, webRequestManager, storageManager}
+	pca := &PublicClientApplication{pcaParameters, webRequestManager, storageManager, cacheManager}
 	return pca, nil
 }
 
@@ -35,9 +37,7 @@ func (pca *PublicClientApplication) AcquireTokenByUsernamePassword(usernamePassw
 	authParams := pca.pcaParameters.createAuthenticationParameters()
 	usernamePasswordParameters.augmentAuthenticationParameters(authParams)
 
-	cacheManager := tokencache.CreateCacheManager(pca.storageManager, authParams)
-
-	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, cacheManager, authParams)
+	req := requests.CreateUsernamePasswordRequest(pca.webRequestManager, pca.cacheManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
 		return createAuthenticationResult(tokenResponse), nil
@@ -49,9 +49,7 @@ func (pca *PublicClientApplication) AcquireTokenByDeviceCode(deviceCodeParameter
 	authParams := pca.pcaParameters.createAuthenticationParameters()
 	deviceCodeParameters.augmentAuthenticationParameters(authParams)
 
-	cacheManager := tokencache.CreateCacheManager(pca.storageManager, authParams)
-
-	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, cacheManager, authParams)
+	req := requests.CreateDeviceCodeRequest(pca.webRequestManager, pca.cacheManager, authParams)
 	tokenResponse, err := req.Execute()
 	if err == nil {
 		return createAuthenticationResult(tokenResponse), nil

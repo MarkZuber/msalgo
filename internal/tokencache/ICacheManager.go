@@ -11,7 +11,7 @@ type ReadCacheResponse struct {
 }
 
 type ICacheManager interface {
-	TryReadCache() *ReadCacheResponse
-	CacheTokenResponse(tokenResponse *msalbase.TokenResponse) (contracts.IAccount, error)
-	DeleteCachedRefreshToken() error
+	TryReadCache(authParameters *msalbase.AuthParametersInternal) *ReadCacheResponse
+	CacheTokenResponse(authParameters *msalbase.AuthParametersInternal, tokenResponse *msalbase.TokenResponse) (contracts.IAccount, error)
+	DeleteCachedRefreshToken(authParameters *msalbase.AuthParametersInternal) error
 }
