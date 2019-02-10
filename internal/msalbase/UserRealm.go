@@ -2,7 +2,6 @@ package msalbase
 
 import (
 	"encoding/json"
-	"log"
 )
 
 type UserRealmAccountType int
@@ -26,7 +25,7 @@ type UserRealm struct {
 
 // CreateUserRealm stuff
 func CreateUserRealm(responseData string) (*UserRealm, error) {
-	log.Println(responseData)
+	// log.Println(responseData)
 	userRealm := &UserRealm{}
 	var err = json.Unmarshal([]byte(responseData), userRealm)
 	if err != nil {

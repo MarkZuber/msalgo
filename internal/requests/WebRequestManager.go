@@ -2,6 +2,7 @@ package requests
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -40,7 +41,7 @@ func (wrm *WebRequestManager) GetUserRealm(authParameters *msalbase.AuthParamete
 	log.Println("getuserrealm entered")
 	url := authParameters.GetAuthorityEndpoints().GetUserRealmEndpoint(authParameters.GetUsername())
 
-	log.Println("user realm endpoint: " + url)
+	// log.Println("user realm endpoint: " + url)
 	httpManagerResponse, err := wrm.httpManager.Get(url, wrm.getAadHeaders(authParameters))
 	if err != nil {
 		return nil, err
@@ -100,16 +101,16 @@ func (wrm *WebRequestManager) GetWsTrustResponse(authParameters *msalbase.AuthPa
 
 	addContentTypeHeader(headers, SoapXmlUtf8)
 
-	log.Println("calling POST for wstrustresponse")
-	log.Println(endpoint.GetURL())
-	log.Println(wsTrustRequestMessage)
+	// log.Println("calling POST for wstrustresponse")
+	// log.Println(endpoint.GetURL())
+	// log.Println(wsTrustRequestMessage)
 
 	response, err := wrm.httpManager.Post(endpoint.GetURL(), wsTrustRequestMessage, headers)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println(response.GetResponseData())
+	// log.Println(response.GetResponseData())
 
 	return wstrust.CreateWsTrustResponse(response.GetResponseData()), nil
 }
@@ -131,7 +132,11 @@ func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *msalba
 	default:
 		return nil, errors.New("GetAccessTokenFromSamlGrant returned unknown saml assertion type: " + string(samlGrant.GetAssertionType()))
 	}
-	// todo: decodedQueryParams["assertion"] = StringUtils::Base64RFCEncodePadded(samlGrant->GetAssertion());
+
+	// log.Println(samlGrant.GetAssertion())
+
+	decodedQueryParams["assertion"] = base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString([]byte(samlGrant.GetAssertion())) //  .EncodeToString([]byte(samlGrant.GetAssertion())) // StringUtils::Base64RFCEncodePadded(samlGrant->GetAssertion());
+
 	addClientIdQueryParam(decodedQueryParams, authParameters)
 	addScopeQueryParam(decodedQueryParams, authParameters)
 	addClientInfoQueryParam(decodedQueryParams)
@@ -258,7 +263,7 @@ func encodeQueryParameters(queryParameters map[string]string) string {
 	}
 
 	result := buffer.String()
-	log.Println(result)
+	// log.Println(result)
 	return result
 }
 

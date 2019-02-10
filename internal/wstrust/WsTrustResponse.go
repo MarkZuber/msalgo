@@ -1,7 +1,9 @@
 package wstrust
 
 import (
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -11,7 +13,7 @@ type WsTrustResponse struct {
 
 func CreateWsTrustResponse(responseData string) *WsTrustResponse {
 	log.Println("CreateWsTrustResponse ENTERED")
-	log.Println(responseData)
+	// log.Println(responseData)
 	response := &WsTrustResponse{responseData}
 	return response
 
@@ -42,34 +44,33 @@ func (wsTrustResponse *WsTrustResponse) GetSAMLAssertion(endpoint *WsTrustEndpoi
 		{
 			log.Println("Extracting assertion from WS-Trust 1.3 token:")
 
-			log.Println(wsTrustResponse.responseData)
-			return CreateSamlTokenInfo(SamlV2, "theassertion"), nil
+			samldefinitions := &samldefinitions{}
+			var err = xml.Unmarshal([]byte(wsTrustResponse.responseData), samldefinitions)
+			if err != nil {
+				return nil, err
+			}
 
-			// auto tokenResponseCollection =
-			//     _doc.child("s:Envelope").child("s:Body").child("trust:RequestSecurityTokenResponseCollection");
-			// for (const auto& tokenResponse : tokenResponseCollection.children("trust:RequestSecurityTokenResponse"))
-			// {
-			//     auto token = tokenResponse.child("trust:RequestedSecurityToken");
-			//     if (token.first_child() != nullptr)
-			//     {
-			// 		log.Println("Found valid assertion, converting to string")
-			//         stringstream assertion;
-			//         // We need pugixml to not add whitespace, since the assertion is signed
-			//         token.child("saml:Assertion").print(assertion, "", pugi::format_raw);
-			//         string samlVersion = token.child("saml:Assertion").attribute("xmlns:saml").value();
-			//         if (samlVersion == "urn:oasis:names:tc:SAML:1.0:assertion")
-			//         {
-			//             log.Println("Retrieved WS-Trust 1.3 / SAML V1 assertion")
-			//             return make_shared<SamlTokenInfo>(SamlV1, assertion.str());
-			//         }
-			//         if (samlVersion == "urn:oasis:names:tc:SAML:2.0:assertion")
-			//         {
-			//             log.Println("Retrieved WS-Trust 1.3 / SAML V2 assertion")
-			//             return make_shared<SamlTokenInfo>(SamlV2, assertion.str());
-			// 		}
-			// 		return errors.New("Couldn't parse SAML assertion, version unknown: '%s'", samlVersion)
-			//     }
-			// }
+			for _, tokenResponse := range samldefinitions.Body.RequestSecurityTokenResponseCollection.RequestSecurityTokenResponse {
+				token := tokenResponse.RequestedSecurityToken
+				if token.Assertion.XMLName.Local != "" {
+					// log.Println("Found valid assertion")
+					assertion := token.AssertionRawXML
+
+					samlVersion := token.Assertion.Saml
+					if samlVersion == "urn:oasis:names:tc:SAML:1.0:assertion" {
+						log.Println("Retrieved WS-Trust 1.3 / SAML V1 assertion")
+						return CreateSamlTokenInfo(SamlV1, assertion), nil
+					}
+					if samlVersion == "urn:oasis:names:tc:SAML:2.0:assertion" {
+						log.Println("Retrieved WS-Trust 1.3 / SAML V2 assertion")
+						return CreateSamlTokenInfo(SamlV2, assertion), nil
+					}
+
+					return nil, fmt.Errorf("Couldn't parse SAML assertion, version unknown: '%s'", samlVersion)
+				}
+			}
+
+			return nil, errors.New("Couldn't find SAML assertion")
 		}
 	default:
 		return nil, errors.New("Unknown WS-Trust version")

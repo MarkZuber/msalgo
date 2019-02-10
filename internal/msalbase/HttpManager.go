@@ -45,9 +45,8 @@ func CreateHTTPManagerResponse(resp *http.Response) (*HTTPManagerResponse, error
 		return nil, err
 	}
 
-	log.Println("CreateHTTPManagerResponse")
-	log.Println(resp.Status)
-	log.Println(string(body))
+	log.Println("   HTTP Response: " + resp.Status)
+	// log.Println(string(body))
 
 	headers := make(map[string]string)
 	for k, v := range resp.Header {
@@ -74,12 +73,11 @@ func CreateHTTPManager() *HTTPManager {
 }
 
 func (mgr *HTTPManager) performRequest(req *http.Request, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Println("HEADERS")
+	log.Println("   HEADERS:")
 	for k, v := range requestHeaders {
 		req.Header.Add(k, v)
-		log.Printf("%v: %v", k, v)
+		log.Printf("     %v: %v", k, v)
 	}
-	log.Println("---------")
 
 	resp, err := mgr.client.Do(req)
 	if err != nil {
@@ -91,7 +89,9 @@ func (mgr *HTTPManager) performRequest(req *http.Request, requestHeaders map[str
 
 // Get stuff
 func (mgr *HTTPManager) Get(url string, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Printf("GET to %v", url)
+	log.Println("<------------------")
+	log.Printf("   GET to %v", url)
+	defer log.Println("------------------>")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -102,9 +102,10 @@ func (mgr *HTTPManager) Get(url string, requestHeaders map[string]string) (*HTTP
 
 // Post stuff
 func (mgr *HTTPManager) Post(url string, body string, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Printf("POST to %v", url)
-	log.Println(body)
-	log.Println("------------------")
+	log.Println("<------------------")
+	log.Printf("   POST to %v", url)
+	// log.Println(body)
+	defer log.Println("------------------>")
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
 		return nil, err

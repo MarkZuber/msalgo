@@ -41,7 +41,7 @@ func (req *UsernamePasswordRequest) Execute() (*msalbase.TokenResponse, error) {
 		return nil, err
 	}
 
-	log.Println("got user realm")
+	// log.Println("got user realm")
 
 	switch accountType := userRealm.GetAccountType(); accountType {
 	case msalbase.Federated:

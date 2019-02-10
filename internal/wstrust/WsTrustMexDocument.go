@@ -31,12 +31,12 @@ type WsTrustMexDocument struct {
 
 func updateEndpoint(cached *WsTrustEndpoint, found WsTrustEndpoint) bool {
 	if cached == nil {
-		log.Println("No endpoint cached, using found endpoint")
+		// log.Println("No endpoint cached, using found endpoint")
 		*cached = found
 		return true
 	}
 	if (*cached).GetVersion() == Trust2005 && found.GetVersion() == Trust13 {
-		log.Println("Cached endpoint is v2005, replacing with v1.3")
+		// log.Println("Cached endpoint is v2005, replacing with v1.3")
 		*cached = found
 		return true
 	}
@@ -54,15 +54,15 @@ func CreateWsTrustMexDocument(responseData string) (*WsTrustMexDocument, error) 
 
 	for _, policy := range definitions.Policy {
 		if policy.ExactlyOne.All.SignedEncryptedSupportingTokens.Policy.UsernameToken.Policy.WssUsernameToken10.XMLName.Local != "" {
-			log.Println("Found Policy with UsernamePassword 1.3: " + policy.ID)
+			// log.Println("Found Policy with UsernamePassword 1.3: " + policy.ID)
 			policies["#"+policy.ID] = WsEndpointTypeUsernamePassword
 		}
 		if policy.ExactlyOne.All.SignedSupportingTokens.Policy.UsernameToken.Policy.WssUsernameToken10.XMLName.Local != "" {
-			log.Println("Found Policy with UsernamePassword 2005: " + policy.ID)
+			// log.Println("Found Policy with UsernamePassword 2005: " + policy.ID)
 			policies["#"+policy.ID] = WsEndpointTypeUsernamePassword
 		}
 		if policy.ExactlyOne.All.NegotiateAuthentication.XMLName.Local != "" {
-			log.Println("Found policy with WindowsTransport: " + policy.ID)
+			// log.Println("Found policy with WindowsTransport: " + policy.ID)
 			policies["#"+policy.ID] = WsEndpointTypeWindowsTransport
 		}
 	}
@@ -71,14 +71,14 @@ func CreateWsTrustMexDocument(responseData string) (*WsTrustMexDocument, error) 
 
 	for _, binding := range definitions.Binding {
 		policyName := binding.PolicyReference.URI
-		log.Println(policyName)
+		// log.Println(policyName)
 		transport := binding.Binding.Transport
 
 		if transport == "http://schemas.xmlsoap.org/soap/http" {
 			if policy, ok := policies[policyName]; ok {
 				bindingName := binding.Name
 				specVersion := binding.Operation.Operation.SoapAction
-				log.Printf("Found binding %v Spec %v", bindingName, specVersion)
+				// log.Printf("Found binding %v Spec %v", bindingName, specVersion)
 
 				if specVersion == trust13Spec {
 					bindings[bindingName] = WsEndpointData{Trust13, policy}
@@ -96,7 +96,7 @@ func CreateWsTrustMexDocument(responseData string) (*WsTrustMexDocument, error) 
 
 	for _, port := range definitions.Service.Port {
 		bindingName := port.Binding
-		log.Println("Parsing port with binding name: " + bindingName)
+		// log.Println("Parsing port with binding name: " + bindingName)
 
 		index := strings.Index(bindingName, ":")
 		if index != -1 {
@@ -109,16 +109,16 @@ func CreateWsTrustMexDocument(responseData string) (*WsTrustMexDocument, error) 
 
 			endpoint := CreateWsTrustEndpoint(binding.Version, url)
 
-			log.Printf("Associated port '%v' with binding, url '%v'", bindingName, url)
+			// log.Printf("Associated port '%v' with binding, url '%v'", bindingName, url)
 			switch binding.EndpointType {
 			case WsEndpointTypeUsernamePassword:
 				if updateEndpoint(&usernamePasswordEndpoint, endpoint) {
-					log.Printf("Updated cached username/password endpoint to binding '%v'", bindingName)
+					// log.Printf("Updated cached username/password endpoint to binding '%v'", bindingName)
 				}
 				break
 			case WsEndpointTypeWindowsTransport:
 				if updateEndpoint(&windowsTransportEndpoint, endpoint) {
-					log.Printf("Updated cached windows transport endpoint to binding '%v'", bindingName)
+					// log.Printf("Updated cached windows transport endpoint to binding '%v'", bindingName)
 				}
 				break
 			default:

@@ -183,7 +183,7 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 		return "", err
 	}
 
-	log.Println(string(output))
+	// log.Println(string(output))
 
 	return string(output), nil
 }
