@@ -35,10 +35,10 @@ func CreateUserRealm(responseData string) (*UserRealm, error) {
 	}
 
 	if userRealm.GetAccountType() == Federated {
-		// assert federationProtocol and federationMetadataURL are set/valid/non-null
+		// todo: assert federationProtocol and federationMetadataURL are set/valid/non-null
 	}
 
-	// assert domainName, cloudInstanceName, cloudInstanceUrn are set/valid/non-null
+	// todo: assert domainName, cloudInstanceName, cloudInstanceUrn are set/valid/non-null
 
 	return userRealm, nil
 }
