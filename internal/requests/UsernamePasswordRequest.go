@@ -2,7 +2,8 @@ package requests
 
 import (
 	"errors"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo/internal/tokencache"
 
@@ -41,11 +42,9 @@ func (req *UsernamePasswordRequest) Execute() (*msalbase.TokenResponse, error) {
 		return nil, err
 	}
 
-	// log.Println("got user realm")
-
 	switch accountType := userRealm.GetAccountType(); accountType {
 	case msalbase.Federated:
-		log.Println("FEDERATED")
+		log.Trace("FEDERATED")
 		if mexDoc, err := req.webRequestManager.GetMex(userRealm.GetFederationMetadataURL()); err == nil {
 			wsTrustEndpoint := mexDoc.GetWsTrustUsernamePasswordEndpoint()
 			if wsTrustResponse, err := req.webRequestManager.GetWsTrustResponse(req.authParameters, userRealm.GetCloudAudienceURN(), &wsTrustEndpoint); err == nil {
@@ -57,7 +56,7 @@ func (req *UsernamePasswordRequest) Execute() (*msalbase.TokenResponse, error) {
 		// todo: check for ui interaction in api result...
 		return nil, err
 	case msalbase.Managed:
-		log.Println("MANAGED")
+		log.Trace("MANAGED")
 		return req.webRequestManager.GetAccessTokenFromUsernamePassword(req.authParameters)
 	default:
 		return nil, errors.New("Unknown account type")

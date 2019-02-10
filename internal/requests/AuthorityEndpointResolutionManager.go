@@ -2,8 +2,9 @@ package requests
 
 import (
 	"errors"
-	"log"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
 )
@@ -78,11 +79,11 @@ func (m *AuthorityEndpointResolutionManager) ResolveEndpoints(authorityInfo *msa
 
 	endpoints := m.tryGetCachedEndpoints(authorityInfo, userPrincipalName)
 	if endpoints != nil {
-		log.Println("Resolving authority endpoints. Using cached value")
+		log.Info("Resolving authority endpoints. Using cached value")
 		return endpoints, nil
 	}
 
-	log.Println("Resolving authority endpoints. No cached value.  Performing lookup.")
+	log.Info("Resolving authority endpoints. No cached value.  Performing lookup.")
 	endpointManager, err := createOpenIdConfigurationEndpointManager(authorityInfo)
 	if err != nil {
 		return nil, err

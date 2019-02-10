@@ -4,7 +4,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type WsTrustResponse struct {
@@ -12,8 +13,8 @@ type WsTrustResponse struct {
 }
 
 func CreateWsTrustResponse(responseData string) *WsTrustResponse {
-	log.Println("CreateWsTrustResponse ENTERED")
-	// log.Println(responseData)
+	log.Info("CreateWsTrustResponse ENTERED")
+	log.Trace(responseData)
 	response := &WsTrustResponse{responseData}
 	return response
 
@@ -42,7 +43,7 @@ func (wsTrustResponse *WsTrustResponse) GetSAMLAssertion(endpoint *WsTrustEndpoi
 		return nil, errors.New("WS Trust 2005 support is not implemented")
 	case Trust13:
 		{
-			log.Println("Extracting assertion from WS-Trust 1.3 token:")
+			log.Trace("Extracting assertion from WS-Trust 1.3 token:")
 
 			samldefinitions := &samldefinitions{}
 			var err = xml.Unmarshal([]byte(wsTrustResponse.responseData), samldefinitions)
@@ -53,16 +54,16 @@ func (wsTrustResponse *WsTrustResponse) GetSAMLAssertion(endpoint *WsTrustEndpoi
 			for _, tokenResponse := range samldefinitions.Body.RequestSecurityTokenResponseCollection.RequestSecurityTokenResponse {
 				token := tokenResponse.RequestedSecurityToken
 				if token.Assertion.XMLName.Local != "" {
-					// log.Println("Found valid assertion")
+					log.Trace("Found valid assertion")
 					assertion := token.AssertionRawXML
 
 					samlVersion := token.Assertion.Saml
 					if samlVersion == "urn:oasis:names:tc:SAML:1.0:assertion" {
-						log.Println("Retrieved WS-Trust 1.3 / SAML V1 assertion")
+						log.Trace("Retrieved WS-Trust 1.3 / SAML V1 assertion")
 						return CreateSamlTokenInfo(SamlV1, assertion), nil
 					}
 					if samlVersion == "urn:oasis:names:tc:SAML:2.0:assertion" {
-						log.Println("Retrieved WS-Trust 1.3 / SAML V2 assertion")
+						log.Trace("Retrieved WS-Trust 1.3 / SAML V2 assertion")
 						return CreateSamlTokenInfo(SamlV2, assertion), nil
 					}
 

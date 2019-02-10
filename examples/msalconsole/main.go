@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo"
 )
@@ -23,13 +24,13 @@ func acquireByDeviceCode() {
 		log.Fatal(err)
 	}
 
-	log.Println("acquiring token by device code")
+	log.Info("acquiring token by device code")
 	deviceCodeParams := msalgo.CreateAcquireTokenDeviceCodeParameters([]string{"user.read"})
 	result, err := pca.AcquireTokenByDeviceCode(deviceCodeParams)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("ACCESS TOKEN: " + result.GetAccessToken())
+	log.Info("ACCESS TOKEN: " + result.GetAccessToken())
 }
 
 func readInput() string {
@@ -47,7 +48,7 @@ func acquireByUsernamePassword() {
 		log.Fatal(err)
 	}
 
-	log.Println("acquiring token by username password")
+	log.Info("acquiring token by username password")
 
 	fmt.Println("Enter username: ")
 	userName := readInput()
@@ -59,12 +60,13 @@ func acquireByUsernamePassword() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("ACCESS TOKEN: " + result.GetAccessToken())
+	log.Info("ACCESS TOKEN: " + result.GetAccessToken())
 }
 
 func main() {
 
-	log.Println("creating pca")
+	// set this to get function names in the logs: log.SetReportCaller(true)
+	log.Info("creating pca")
 
 	// acquireByDeviceCode()
 	acquireByUsernamePassword()

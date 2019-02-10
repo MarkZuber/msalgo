@@ -2,8 +2,9 @@ package wstrust
 
 import (
 	"encoding/xml"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
 	uuid "github.com/twinj/uuid"
@@ -120,13 +121,13 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 	expiresTime := createdTime.Add(10 * time.Minute)
 
 	if wte.endpointVersion == Trust2005 {
-		log.Println("Building WS-Trust token request for v2005")
+		log.Trace("Building WS-Trust token request for v2005")
 		soapAction = trust2005Spec
 		trustNamespace = "http://schemas.xmlsoap.org/ws/2005/02/trust"
 		keyType = "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey"
 		requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue"
 	} else {
-		log.Println("Building WS-Trust token request for v1.3")
+		log.Trace("Building WS-Trust token request for v1.3")
 		soapAction = trust13Spec
 		trustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512"
 		keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"
@@ -183,7 +184,7 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 		return "", err
 	}
 
-	// log.Println(string(output))
+	log.Trace(string(output))
 
 	return string(output), nil
 }

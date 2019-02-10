@@ -2,7 +2,6 @@ package msalbase
 
 import (
 	"encoding/json"
-	"log"
 )
 
 type TokenResponse struct {
@@ -16,7 +15,6 @@ type TokenResponse struct {
 }
 
 func (tr *TokenResponse) IsAuthorizationPending() bool {
-	log.Println(tr.Error)
 	return tr.Error == "authorization_pending"
 }
 

@@ -2,11 +2,12 @@ package msalbase
 
 import (
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // HTTPManager stuff
@@ -45,8 +46,8 @@ func CreateHTTPManagerResponse(resp *http.Response) (*HTTPManagerResponse, error
 		return nil, err
 	}
 
-	log.Println("   HTTP Response: " + resp.Status)
-	// log.Println(string(body))
+	log.Info("   HTTP Response: " + resp.Status)
+	log.Trace(string(body))
 
 	headers := make(map[string]string)
 	for k, v := range resp.Header {
@@ -73,10 +74,10 @@ func CreateHTTPManager() *HTTPManager {
 }
 
 func (mgr *HTTPManager) performRequest(req *http.Request, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Println("   HEADERS:")
+	log.Info("   HEADERS:")
 	for k, v := range requestHeaders {
 		req.Header.Add(k, v)
-		log.Printf("     %v: %v", k, v)
+		log.Infof("     %v: %v", k, v)
 	}
 
 	resp, err := mgr.client.Do(req)
@@ -89,9 +90,9 @@ func (mgr *HTTPManager) performRequest(req *http.Request, requestHeaders map[str
 
 // Get stuff
 func (mgr *HTTPManager) Get(url string, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Println("<------------------")
-	log.Printf("   GET to %v", url)
-	defer log.Println("------------------>")
+	log.Info("<------------------")
+	log.Infof("   GET to %v", url)
+	defer log.Info("------------------>")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -102,10 +103,10 @@ func (mgr *HTTPManager) Get(url string, requestHeaders map[string]string) (*HTTP
 
 // Post stuff
 func (mgr *HTTPManager) Post(url string, body string, requestHeaders map[string]string) (*HTTPManagerResponse, error) {
-	log.Println("<------------------")
-	log.Printf("   POST to %v", url)
-	// log.Println(body)
-	defer log.Println("------------------>")
+	log.Info("<------------------")
+	log.Infof("   POST to %v", url)
+	log.Trace(body)
+	defer log.Info("------------------>")
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
 		return nil, err

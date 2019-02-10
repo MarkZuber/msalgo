@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/wstrust"
@@ -38,10 +39,10 @@ func CreateWebRequestManager(httpManager *msalbase.HTTPManager) IWebRequestManag
 
 // GetUserRealm stuff
 func (wrm *WebRequestManager) GetUserRealm(authParameters *msalbase.AuthParametersInternal) (*msalbase.UserRealm, error) {
-	log.Println("getuserrealm entered")
+	log.Trace("GetUserRealm entered")
 	url := authParameters.GetAuthorityEndpoints().GetUserRealmEndpoint(authParameters.GetUsername())
 
-	// log.Println("user realm endpoint: " + url)
+	log.Trace("user realm endpoint: " + url)
 	httpManagerResponse, err := wrm.httpManager.Get(url, wrm.getAadHeaders(authParameters))
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func (wrm *WebRequestManager) GetWsTrustResponse(authParameters *msalbase.AuthPa
 		wsTrustRequestMessage, err = endpoint.BuildTokenRequestMessageUsernamePassword(
 			cloudAudienceURN, authParameters.GetUsername(), authParameters.GetPassword())
 	default:
-		log.Println("unknown auth type!")
+		log.Error("unknown auth type!")
 		err = errors.New("Unknown auth type")
 	}
 
@@ -101,16 +102,10 @@ func (wrm *WebRequestManager) GetWsTrustResponse(authParameters *msalbase.AuthPa
 
 	addContentTypeHeader(headers, SoapXmlUtf8)
 
-	// log.Println("calling POST for wstrustresponse")
-	// log.Println(endpoint.GetURL())
-	// log.Println(wsTrustRequestMessage)
-
 	response, err := wrm.httpManager.Post(endpoint.GetURL(), wsTrustRequestMessage, headers)
 	if err != nil {
 		return nil, err
 	}
-
-	// log.Println(response.GetResponseData())
 
 	return wstrust.CreateWsTrustResponse(response.GetResponseData()), nil
 }
@@ -132,8 +127,6 @@ func (wrm *WebRequestManager) GetAccessTokenFromSamlGrant(authParameters *msalba
 	default:
 		return nil, errors.New("GetAccessTokenFromSamlGrant returned unknown saml assertion type: " + string(samlGrant.GetAssertionType()))
 	}
-
-	// log.Println(samlGrant.GetAssertion())
 
 	decodedQueryParams["assertion"] = base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString([]byte(samlGrant.GetAssertion())) //  .EncodeToString([]byte(samlGrant.GetAssertion())) // StringUtils::Base64RFCEncodePadded(samlGrant->GetAssertion());
 
@@ -204,7 +197,7 @@ func joinScopes(scopes []string) string {
 }
 
 func addScopeQueryParam(queryParams map[string]string, authParameters *msalbase.AuthParametersInternal) {
-	log.Println("Adding scopes 'openid', 'offline_access', 'profile'")
+	log.Trace("Adding scopes 'openid', 'offline_access', 'profile'")
 	requestedScopes := authParameters.GetScopes()
 
 	// openid equired to get an id token
@@ -249,8 +242,6 @@ func getAadHeaders(authParameters *msalbase.AuthParametersInternal) map[string]s
 func encodeQueryParameters(queryParameters map[string]string) string {
 	var buffer bytes.Buffer
 
-	log.Println("encodeQueryParameters...")
-
 	first := true
 	for k, v := range queryParameters {
 		if !first {
@@ -263,7 +254,7 @@ func encodeQueryParameters(queryParameters map[string]string) string {
 	}
 
 	result := buffer.String()
-	// log.Println(result)
+	log.Trace(result)
 	return result
 }
 

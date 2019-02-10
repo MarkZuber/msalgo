@@ -29,7 +29,6 @@ type deviceCodeResponse struct {
 
 // createDeviceCodeResponse stuff
 func createDeviceCodeResponse(responseData string) (*deviceCodeResponse, error) {
-	// log.Println(responseData)
 	dcResponse := &deviceCodeResponse{}
 	var err = json.Unmarshal([]byte(responseData), dcResponse)
 	if err != nil {

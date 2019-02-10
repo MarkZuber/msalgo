@@ -2,8 +2,9 @@ package requests
 
 import (
 	"errors"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/tokencache"
@@ -37,7 +38,7 @@ func (req *DeviceCodeRequest) Execute() (*msalbase.TokenResponse, error) {
 	}
 
 	// fire deviceCodeResult up to user
-	log.Printf("%v", deviceCodeResult)
+	log.Infof("%v", deviceCodeResult)
 
 	return req.waitForTokenResponse(deviceCodeResult)
 }
