@@ -5,17 +5,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type deviceCodeResponse struct {
-	Error            string `json:"error"`
-	SubError         string `json:"suberror"`
-	ErrorDescription string `json:"error_description"`
-	ErrorCodes       []int  `json:"error_codes"`
-	CorrelationID    string `json:"correlation_id"`
-	Claims           string `json:"claims"`
-
+	BaseResponse    *msalbase.OAuthResponseBase
 	UserCode        string `json:"user_code"`
 	DeviceCode      string `json:"device_code"`
 	VerificationURL string `json:"verification_url"`
@@ -28,12 +23,19 @@ type deviceCodeResponse struct {
 }
 
 // createDeviceCodeResponse stuff
-func createDeviceCodeResponse(responseData string) (*deviceCodeResponse, error) {
-	dcResponse := &deviceCodeResponse{}
-	var err = json.Unmarshal([]byte(responseData), dcResponse)
+func createDeviceCodeResponse(responseCode int, responseData string) (*deviceCodeResponse, error) {
+	baseResponse, err := msalbase.CreateOAuthResponseBase(responseCode, responseData)
 	if err != nil {
 		return nil, err
 	}
+
+	dcResponse := &deviceCodeResponse{}
+	err = json.Unmarshal([]byte(responseData), dcResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	dcResponse.BaseResponse = baseResponse
 
 	expiresIn, err := strconv.Atoi(dcResponse.ExpiresInStr)
 	if err != nil {

@@ -6,31 +6,20 @@ import (
 )
 
 type tokenResponseJsonPayload struct {
-	Error            string `json:"error"`
-	SubError         string `json:"suberror"`
-	ErrorDescription string `json:"error_description"`
-	ErrorCodes       []int  `json:"error_codes"`
-	CorrelationID    string `json:"correlation_id"`
-	Claims           string `json:"claims"`
-	AccessToken      string `json:"access_token"`
-	RefreshToken     string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type TokenResponse struct {
-	errorVal         string
-	subError         string
-	errorDescription string
-	errorCodes       []int
-	correlationID    string
-	claims           string
-	accessToken      string
-	refreshToken     string
-	idToken          *IDToken
-	grantedScopes    []string
+	baseResponse  *OAuthResponseBase
+	accessToken   string
+	refreshToken  string
+	idToken       *IDToken
+	grantedScopes []string
 }
 
 func (tr *TokenResponse) IsAuthorizationPending() bool {
-	return tr.errorVal == "authorization_pending"
+	return tr.baseResponse.Error == "authorization_pending"
 }
 
 func (tr *TokenResponse) GetAccessToken() string {
@@ -62,22 +51,22 @@ func (tr *TokenResponse) GetRawClientInfo() string {
 	return ""
 }
 
-func CreateTokenResponse(authParameters *AuthParametersInternal, responseData string) (*TokenResponse, error) {
+func CreateTokenResponse(authParameters *AuthParametersInternal, responseCode int, responseData string) (*TokenResponse, error) {
+	baseResponse, err := CreateOAuthResponseBase(responseCode, responseData)
+	if err != nil {
+		return nil, err
+	}
+
 	payload := &tokenResponseJsonPayload{}
-	var err = json.Unmarshal([]byte(responseData), payload)
+	err = json.Unmarshal([]byte(responseData), payload)
 	if err != nil {
 		return nil, err
 	}
 
 	tokenResponse := &TokenResponse{
-		errorVal:         payload.Error,
-		subError:         payload.SubError,
-		errorDescription: payload.ErrorDescription,
-		errorCodes:       payload.ErrorCodes,
-		correlationID:    payload.CorrelationID,
-		claims:           payload.Claims,
-		accessToken:      payload.AccessToken,
-		refreshToken:     payload.RefreshToken}
+		baseResponse: baseResponse,
+		accessToken:  payload.AccessToken,
+		refreshToken: payload.RefreshToken}
 	return tokenResponse, nil
 }
 

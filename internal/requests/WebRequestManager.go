@@ -168,7 +168,7 @@ func (wrm *WebRequestManager) GetDeviceCodeResult(authParameters *msalbase.AuthP
 	if err != nil {
 		return nil, err
 	}
-	dcResponse, err := createDeviceCodeResponse(response.GetResponseData())
+	dcResponse, err := createDeviceCodeResponse(response.GetResponseCode(), response.GetResponseData())
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func (wrm *WebRequestManager) exchangeGrantForToken(authParameters *msalbase.Aut
 	if err != nil {
 		return nil, err
 	}
-	return msalbase.CreateTokenResponse(authParameters, response.GetResponseData())
+	return msalbase.CreateTokenResponse(authParameters, response.GetResponseCode(), response.GetResponseData())
 }
 
 func (wrm *WebRequestManager) GetAccessTokenFromAuthCode(authParameters *msalbase.AuthParametersInternal, authCode string) (*msalbase.TokenResponse, error) {
@@ -352,9 +352,5 @@ func (wrm *WebRequestManager) GetTenantDiscoveryResponse(openIdConfigurationEndp
 		return nil, err
 	}
 
-	if httpManagerResponse.GetResponseCode() != 200 {
-		return nil, errors.New("invalid response code") // todo: need error struct here
-	}
-
-	return createTenantDiscoveryResponse(httpManagerResponse.GetResponseData())
+	return createTenantDiscoveryResponse(httpManagerResponse.GetResponseCode(), httpManagerResponse.GetResponseData())
 }
