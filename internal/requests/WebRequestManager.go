@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"runtime"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -231,8 +232,8 @@ func addContentTypeHeader(headers map[string]string, contentType ContentType) {
 func getAadHeaders(authParameters *msalbase.AuthParametersInternal) map[string]string {
 	headers := make(map[string]string)
 
-	// headers["x-client-SKU"] = fmt.Sprintf("MSAL.golang.%s", systemInfo.GetName());
-	// headers["x-client-OS"] = systemInfo.GetVersion();
+	headers["x-client-SKU"] = fmt.Sprintf("MSAL.golang.%s", runtime.GOOS)
+	headers["x-client-OS"] = msalbase.GetOSVersion()
 	// headers["x-client-Ver"] = todo: client version here;
 	headers["client-request-id"] = authParameters.GetCorrelationID()
 	headers["return-client-request-id"] = "false"

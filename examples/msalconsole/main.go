@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/markzuber/msalgo"
+	"github.com/shirou/gopsutil/host"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func createParams() *msalgo.PublicClientApplicationParameters {
@@ -35,9 +38,15 @@ func acquireByDeviceCode() {
 
 func readInput() string {
 	reader := bufio.NewReader(os.Stdin)
-
 	value, _ := reader.ReadString('\n')
-	value = strings.Trim(value, "\r\n")
+	value = strings.TrimSpace(value)
+	return value
+}
+
+func readMaskedInput() string {
+	bytes, _ := terminal.ReadPassword(int(syscall.Stdin))
+	value := string(bytes)
+	value = strings.TrimSpace(value)
 	return value
 }
 
@@ -50,10 +59,13 @@ func acquireByUsernamePassword() {
 
 	log.Info("acquiring token by username password")
 
-	fmt.Println("Enter username: ")
+	fmt.Println()
+	fmt.Print("Enter username: ")
 	userName := readInput()
-	fmt.Println("Enter password: ")
-	password := readInput()
+	fmt.Print("Enter password: ")
+	password := readMaskedInput()
+	fmt.Println()
+	fmt.Println()
 
 	userNameParams := msalgo.CreateAcquireTokenUsernamePasswordParameters([]string{"user.read"}, userName, password)
 	result, err := pca.AcquireTokenByUsernamePassword(userNameParams)
@@ -64,6 +76,9 @@ func acquireByUsernamePassword() {
 }
 
 func main() {
+
+	h, _ := host.Info()
+	log.Infof("%#v", h)
 
 	// set this to get function names in the logs: log.SetReportCaller(true)
 	log.Info("creating pca")
