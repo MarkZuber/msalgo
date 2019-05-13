@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
-	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type deviceCodeResponse struct {
@@ -52,7 +51,7 @@ func createDeviceCodeResponse(responseCode int, responseData string) (*deviceCod
 	return dcResponse, nil
 }
 
-func (dcr *deviceCodeResponse) toDeviceCodeResult(clientID string, scopes []string) *contracts.DeviceCodeResult {
+func (dcr *deviceCodeResponse) toDeviceCodeResult(clientID string, scopes []string) *msalbase.DeviceCodeResult {
 	expiresOn := time.Now().UTC().Add(time.Duration(dcr.ExpiresIn) * time.Second)
-	return contracts.CreateDeviceCodeResult(dcr.UserCode, dcr.DeviceCode, dcr.VerificationURL, expiresOn, dcr.Interval, dcr.Message, clientID, scopes)
+	return msalbase.CreateDeviceCodeResult(dcr.UserCode, dcr.DeviceCode, dcr.VerificationURL, expiresOn, dcr.Interval, dcr.Message, clientID, scopes)
 }

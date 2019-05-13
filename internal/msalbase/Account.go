@@ -1,7 +1,5 @@
 package msalbase
 
-import "github.com/markzuber/msalgo/pkg/contracts"
-
 type Account struct {
 }
 
@@ -17,7 +15,7 @@ func CreateAccount(homeAccountID string,
 	name string,
 	alternativeID string,
 	rawClientInfo string,
-	additionalFieldsJson string) contracts.IAccount {
+	additionalFieldsJSON string) *Account {
 	a := &Account{}
 	return a
 }

@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
-	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type linuxStorageManager struct {
@@ -57,7 +56,7 @@ func (m *linuxStorageManager) ReadAccount(
 	return nil, errors.New("not implemented")
 }
 
-func (m *linuxStorageManager) WriteAccount(correlationID string, account contracts.IAccount) (*OperationStatus, error) {
+func (m *linuxStorageManager) WriteAccount(correlationID string, account *msalbase.Account) (*OperationStatus, error) {
 	return nil, errors.New("not implemented")
 }
 

@@ -5,22 +5,20 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/markzuber/msalgo/internal/tokencache"
-
 	"github.com/markzuber/msalgo/internal/msalbase"
 )
 
 // UsernamePasswordRequest stuff
 type UsernamePasswordRequest struct {
 	webRequestManager IWebRequestManager
-	cacheManager      tokencache.ICacheManager
+	cacheManager      msalbase.ICacheManager
 	authParameters    *msalbase.AuthParametersInternal
 }
 
 // CreateUsernamePasswordRequest stuff
 func CreateUsernamePasswordRequest(
 	webRequestManager IWebRequestManager,
-	cacheManager tokencache.ICacheManager,
+	cacheManager msalbase.ICacheManager,
 	authParameters *msalbase.AuthParametersInternal) *UsernamePasswordRequest {
 	req := &UsernamePasswordRequest{webRequestManager, cacheManager, authParameters}
 	return req

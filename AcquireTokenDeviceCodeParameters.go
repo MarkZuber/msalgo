@@ -17,5 +17,5 @@ func CreateAcquireTokenDeviceCodeParameters(scopes []string) *AcquireTokenDevice
 
 func (p *AcquireTokenDeviceCodeParameters) augmentAuthenticationParameters(authParams *msalbase.AuthParametersInternal) {
 	p.commonParameters.augmentAuthenticationParameters(authParams)
-	authParams.SetAuthorizationType(msalbase.DeviceCode)
+	authParams.SetAuthorizationType(msalbase.AuthorizationTypeDeviceCode)
 }

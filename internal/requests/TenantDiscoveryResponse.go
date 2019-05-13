@@ -6,7 +6,8 @@ import (
 	"github.com/markzuber/msalgo/internal/msalbase"
 )
 
-type tenantDiscoveryResponse struct {
+// TenantDiscoveryResponse stuff
+type TenantDiscoveryResponse struct {
 	BaseResponse *msalbase.OAuthResponseBase
 
 	AuthorizationEndpoint string `json:"authorization_endpoint"`
@@ -14,25 +15,28 @@ type tenantDiscoveryResponse struct {
 	Issuer                string `json:"issuer"`
 }
 
-func (r *tenantDiscoveryResponse) HasAuthorizationEndpoint() bool {
+// HasAuthorizationEndpoint stuff
+func (r *TenantDiscoveryResponse) HasAuthorizationEndpoint() bool {
 	return len(r.AuthorizationEndpoint) > 0
 }
 
-func (r *tenantDiscoveryResponse) HasTokenEndpoint() bool {
+// HasTokenEndpoint stuff
+func (r *TenantDiscoveryResponse) HasTokenEndpoint() bool {
 	return len(r.TokenEndpoint) > 0
 }
 
-func (r *tenantDiscoveryResponse) HasIssuer() bool {
+// HasIssuer stuff
+func (r *TenantDiscoveryResponse) HasIssuer() bool {
 	return len(r.Issuer) > 0
 }
 
-func createTenantDiscoveryResponse(responseCode int, responseData string) (*tenantDiscoveryResponse, error) {
+func createTenantDiscoveryResponse(responseCode int, responseData string) (*TenantDiscoveryResponse, error) {
 	baseResponse, err := msalbase.CreateOAuthResponseBase(responseCode, responseData)
 	if err != nil {
 		return nil, err
 	}
 
-	discoveryResponse := &tenantDiscoveryResponse{}
+	discoveryResponse := &TenantDiscoveryResponse{}
 	err = json.Unmarshal([]byte(responseData), discoveryResponse)
 	if err != nil {
 		return nil, err

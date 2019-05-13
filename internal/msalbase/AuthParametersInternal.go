@@ -3,13 +3,14 @@ package msalbase
 type AuthorizationType int
 
 const (
-	None AuthorizationType = iota
-	UsernamePassword
-	WindowsIntegratedAuth
-	AuthCode
-	Interactive
-	Certificate
-	DeviceCode
+	AuthorizationTypeNone                  AuthorizationType = iota
+	AuthorizationTypeUsernamePassword                        = iota
+	AuthorizationTypeWindowsIntegratedAuth                   = iota
+	AuthorizationTypeAuthCode                                = iota
+	AuthorizationTypeInteractive                             = iota
+	AuthorizationTypeCertificate                             = iota
+	AuthorizationTypeDeviceCode                              = iota
+	AuthorizationTypeRefreshTokenExchange                    = iota
 )
 
 type AuthParametersInternal struct {
@@ -18,7 +19,7 @@ type AuthParametersInternal struct {
 	endpoints         *AuthorityEndpoints
 	clientID          string
 	redirecturi       string
-	accountid         string
+	homeaccountid     string
 	username          string
 	password          string
 	scopes            []string
@@ -84,4 +85,8 @@ func (ap *AuthParametersInternal) GetAuthorizationType() AuthorizationType {
 
 func (ap *AuthParametersInternal) SetAuthorizationType(authType AuthorizationType) {
 	ap.authorizationType = authType
+}
+
+func (ap *AuthParametersInternal) GetHomeAccountID() string {
+	return ap.homeaccountid
 }

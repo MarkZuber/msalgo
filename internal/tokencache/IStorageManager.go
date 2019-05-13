@@ -2,7 +2,6 @@ package tokencache
 
 import (
 	"github.com/markzuber/msalgo/internal/msalbase"
-	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 type OperationStatusType int
@@ -38,12 +37,12 @@ type ReadCredentialsResponse struct {
 }
 
 type ReadAccountsResponse struct {
-	Accounts        []contracts.IAccount
+	Accounts        []*msalbase.Account
 	OperationStatus *OperationStatus
 }
 
 type ReadAccountResponse struct {
-	Account         contracts.IAccount
+	Account         *msalbase.Account
 	OperationStatus *OperationStatus
 }
 
@@ -78,7 +77,7 @@ type IStorageManager interface {
 		environment string,
 		realm string) (*ReadAccountResponse, error)
 
-	WriteAccount(correlationID string, account contracts.IAccount) (*OperationStatus, error)
+	WriteAccount(correlationID string, account *msalbase.Account) (*OperationStatus, error)
 
 	DeleteAccount(
 		correlationID string,

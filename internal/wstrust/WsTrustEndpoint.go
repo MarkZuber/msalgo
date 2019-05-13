@@ -152,7 +152,7 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 	// note: uuid on golang: https://stackoverflow.com/questions/15130321/is-there-a-method-to-generate-a-uuid-with-go-language
 	// using "github.com/twinj/uuid"
 
-	if authType == msalbase.UsernamePassword {
+	if authType == msalbase.AuthorizationTypeUsernamePassword {
 
 		endpointUUID := uuid.NewV4()
 
@@ -190,11 +190,11 @@ func (wte *WsTrustEndpoint) buildTokenRequestMessage(authType msalbase.Authoriza
 }
 
 func (wte *WsTrustEndpoint) BuildTokenRequestMessageWIA(cloudAudienceURN string) (string, error) {
-	return wte.buildTokenRequestMessage(msalbase.WindowsIntegratedAuth, cloudAudienceURN, "", "")
+	return wte.buildTokenRequestMessage(msalbase.AuthorizationTypeWindowsIntegratedAuth, cloudAudienceURN, "", "")
 }
 
 func (wte *WsTrustEndpoint) BuildTokenRequestMessageUsernamePassword(cloudAudienceURN string, username string, password string) (string, error) {
-	return wte.buildTokenRequestMessage(msalbase.UsernamePassword, cloudAudienceURN, username, password)
+	return wte.buildTokenRequestMessage(msalbase.AuthorizationTypeUsernamePassword, cloudAudienceURN, username, password)
 }
 
 func (wte *WsTrustEndpoint) GetURL() string {

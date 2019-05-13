@@ -39,7 +39,7 @@ func (p *AcquireTokenUsernamePasswordParameters) GetPassword() string {
 
 func (p *AcquireTokenUsernamePasswordParameters) augmentAuthenticationParameters(authParams *msalbase.AuthParametersInternal) {
 	p.commonParameters.augmentAuthenticationParameters(authParams)
-	authParams.SetAuthorizationType(msalbase.UsernamePassword)
+	authParams.SetAuthorizationType(msalbase.AuthorizationTypeUsernamePassword)
 	authParams.SetUsername(p.GetUsername())
 	authParams.SetPassword(p.GetPassword())
 }

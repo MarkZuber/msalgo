@@ -31,5 +31,10 @@ func CreateOAuthResponseBase(httpStatusCode int, responseData string) (*OAuthRes
 		return nil, err
 	}
 
+	if payload.Error != "" {
+		// todo: bring in error description, etc.
+		return nil, errors.New(payload.Error)
+	}
+
 	return payload, nil
 }

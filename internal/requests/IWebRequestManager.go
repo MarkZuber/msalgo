@@ -3,7 +3,6 @@ package requests
 import (
 	"github.com/markzuber/msalgo/internal/msalbase"
 	"github.com/markzuber/msalgo/internal/wstrust"
-	"github.com/markzuber/msalgo/pkg/contracts"
 )
 
 // IWebRequestManager interface
@@ -17,9 +16,11 @@ type IWebRequestManager interface {
 	GetAccessTokenFromAuthCode(authParameters *msalbase.AuthParametersInternal, authCode string) (*msalbase.TokenResponse, error)
 	GetAccessTokenFromRefreshToken(authParameters *msalbase.AuthParametersInternal, refreshToken string) (*msalbase.TokenResponse, error)
 	GetAccessTokenWithCertificate(authParameters *msalbase.AuthParametersInternal, certificate *msalbase.ClientCertificate) (*msalbase.TokenResponse, error)
-	GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*contracts.DeviceCodeResult, error)
-	GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *contracts.DeviceCodeResult) (*msalbase.TokenResponse, error)
+	GetDeviceCodeResult(authParameters *msalbase.AuthParametersInternal) (*msalbase.DeviceCodeResult, error)
+	GetAccessTokenFromDeviceCodeResult(authParameters *msalbase.AuthParametersInternal, deviceCodeResult *msalbase.DeviceCodeResult) (*msalbase.TokenResponse, error)
 
-	GetTenantDiscoveryResponse(openIdConfigurationEndpoint string) (*tenantDiscoveryResponse, error)
-	GetAadinstanceDiscoveryResponse(authorityInfo *msalbase.AuthorityInfo) (*instanceDiscoveryResponse, error)
+	GetTenantDiscoveryResponse(openIDConfigurationEndpoint string) (*TenantDiscoveryResponse, error)
+	GetAadinstanceDiscoveryResponse(authorityInfo *msalbase.AuthorityInfo) (*InstanceDiscoveryResponse, error)
+
+	GetProviderConfigurationInformation(authParameters *msalbase.AuthParametersInternal) (*ProviderConfigurationInformation, error)
 }

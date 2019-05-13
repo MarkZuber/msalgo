@@ -14,9 +14,9 @@ type IDToken struct {
 	AlternativeID     string `json:"alternative_id,omitempty"`
 }
 
-func CreateIDToken(jwt string) *IDToken {
+func CreateIDToken(jwt string) (*IDToken, error) {
 	// todo: unmarshal the json...
-	return nil
+	return nil, nil
 }
 
 func (t *IDToken) GetRaw() string {

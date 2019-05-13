@@ -3,9 +3,9 @@ package tokencache
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/markzuber/msalgo/internal/msalbase"
-	"github.com/markzuber/msalgo/pkg/contracts"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -14,7 +14,7 @@ type cacheManager struct {
 	storageManager IStorageManager
 }
 
-func CreateCacheManager(storageManager IStorageManager) ICacheManager {
+func CreateCacheManager(storageManager IStorageManager) msalbase.ICacheManager {
 	cache := &cacheManager{storageManager}
 	return cache
 }
@@ -39,44 +39,52 @@ func isAccessTokenValid(accessToken *msalbase.Credential) bool {
 	return true
 }
 
-func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInternal) *ReadCacheResponse {
+func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInternal) (*msalbase.StorageTokenResponse, error) {
 
 	emptyCorrelationID := ""
 	emptyFamilyID := ""
-	homeAccountID := "" // todo: authParameters.GetAccountID()
+	homeAccountID := authParameters.GetHomeAccountID()
 	// authorityURI := authParameters.GetAuthorityInfo().GetCanonicalAuthorityURI()
 	// shared_ptr<Uri> authority = authParameters.GetAuthority();
 	environment := "" // todo:  authority.GetEnvironment();
 	realm := ""       // authParameters.GetAuthorityInfo().GetRealm() // todo: authority->GetRealm();
 	clientID := authParameters.GetClientID()
-	target := strings.Join(authParameters.GetScopes(), " ") // StringUtils::JoinScopes(authParameters->GetRequestedScopes());
+	target := strings.Join(authParameters.GetScopes(), " ")
 
 	log.Tracef("Querying the cache for homeAccountId '%s' environment '%s' realm '%s' clientId '%s' target:'%s'", homeAccountID, environment, realm, clientID, target)
 
 	if homeAccountID == "" || environment == "" || realm == "" || clientID == "" || target == "" {
 		log.Warn("Skipping the tokens cache lookup, one of the primary keys is empty")
-		return nil
+		return nil, errors.New("Skipping the tokens cache lookup, one of the primary keys is empty")
 	}
 
-	readCredentialsResponse, err := m.storageManager.ReadCredentials(emptyCorrelationID, homeAccountID, environment, realm, clientID, emptyFamilyID, target, map[msalbase.CredentialType]bool{msalbase.CredentialTypeOauth2AccessToken: true, msalbase.CredentialTypeOauth2RefreshToken: true, msalbase.CredentialTypeOidcIdToken: true})
+	readCredentialsResponse, err := m.storageManager.ReadCredentials(
+		emptyCorrelationID,
+		homeAccountID,
+		environment,
+		realm,
+		clientID,
+		emptyFamilyID,
+		target,
+		map[msalbase.CredentialType]bool{msalbase.CredentialTypeOauth2AccessToken: true, msalbase.CredentialTypeOauth2RefreshToken: true, msalbase.CredentialTypeOidcIDToken: true})
 
 	// todo: better error propagation
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	opStatus := readCredentialsResponse.OperationStatus
 
 	if opStatus.StatusType != OperationStatusTypeSuccess {
 		log.Warn("Error reading credentials from the cache")
-		return nil
+		return nil, nil
 	}
 
 	credentials := readCredentialsResponse.Credentials
 
 	if len(credentials) == 0 {
 		log.Warn("No credentials found in the cache")
-		return nil
+		return nil, nil
 	}
 
 	if len(credentials) > 3 {
@@ -89,7 +97,7 @@ func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInter
 
 	for _, cred := range credentials {
 
-		switch cred.CredType {
+		switch cred.GetCredentialType() {
 		case msalbase.CredentialTypeOauth2AccessToken:
 			if accessToken != nil {
 				log.Warn("More than one access token read from the cache")
@@ -104,7 +112,7 @@ func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInter
 			refreshToken = cred
 			break
 
-		case msalbase.CredentialTypeOidcIdToken:
+		case msalbase.CredentialTypeOidcIDToken:
 			if idToken != nil {
 				log.Warn("More than one id token read from the cache")
 			}
@@ -128,28 +136,25 @@ func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInter
 		accessToken = nil
 	}
 
-	if accessToken != nil {
-		refreshToken = nil // There's no need to return a refresh token, return just the access token
-	} else if refreshToken == nil {
+	if accessToken == nil && refreshToken == nil {
 		// There's no access token and no refresh token
 		log.Warn("No valid access token and no refresh token found in the cache")
-		return nil
+		return msalbase.CreateStorageTokenResponse(nil, nil, idToken, nil), nil
 	}
 
-	var idTokenJwt *msalbase.IDToken
-	var account contracts.IAccount
-
-	if idToken != nil {
-		idTokenJwt = msalbase.CreateIDToken(idToken.Secret)
-	}
+	var account *msalbase.Account
 
 	// Search for an account if there's a valid access token. If there's no valid access token, we're going to make a
 	// server call anyway and to make a new account.
 	if accessToken != nil {
-		readAccountResponse, err := m.storageManager.ReadAccount(emptyCorrelationID, homeAccountID, environment, realm)
+		readAccountResponse, err := m.storageManager.ReadAccount(
+			emptyCorrelationID,
+			homeAccountID,
+			environment,
+			realm)
+
 		if err != nil {
-			// todo: error handling
-			return nil
+			return nil, err
 		}
 
 		if readAccountResponse.OperationStatus.StatusType != OperationStatusTypeSuccess {
@@ -163,18 +168,10 @@ func (m *cacheManager) TryReadCache(authParameters *msalbase.AuthParametersInter
 		}
 	}
 
-	tokenResponse, err := msalbase.CreateTokenResponseFromParts(idTokenJwt, accessToken, refreshToken)
-	if err != nil {
-		//
-	}
-
-	// todo: account?  also, make a CreateReadCacheResponse method
-	readCacheResponse := &ReadCacheResponse{tokenResponse, account}
-
-	return readCacheResponse
+	return msalbase.CreateStorageTokenResponse(accessToken, refreshToken, idToken, account), nil
 }
 
-func (m *cacheManager) CacheTokenResponse(authParameters *msalbase.AuthParametersInternal, tokenResponse *msalbase.TokenResponse) (contracts.IAccount, error) {
+func (m *cacheManager) CacheTokenResponse(authParameters *msalbase.AuthParametersInternal, tokenResponse *msalbase.TokenResponse) (*msalbase.Account, error) {
 	homeAccountID := "" // GetHomeAccountId(response)
 	// shared_ptr<Uri> authority = authParameters->GetAuthority();
 	environment := "" // authority.GetEnvironment()
@@ -191,19 +188,15 @@ func (m *cacheManager) CacheTokenResponse(authParameters *msalbase.AuthParameter
 
 	credentialsToWrite := []*msalbase.Credential{}
 
-	// const int64_t cachedAt = TimeUtils::GetSecondsFromEpochNow();
-	cachedAt := ""
+	cachedAt := time.Now().Unix()
 
 	if tokenResponse.HasRefreshToken() {
 		credentialsToWrite = append(credentialsToWrite, msalbase.CreateCredentialRefreshToken(homeAccountID, environment, clientID, cachedAt, tokenResponse.GetRefreshToken(), ""))
 	}
 
 	if tokenResponse.HasAccessToken() {
-		// const int64_t expiresOn = TimeUtils::ToSecondsFromEpoch(response->GetExpiresOn());
-		// const int64_t extendedExpiresOn = TimeUtils::ToSecondsFromEpoch(response->GetExtendedExpiresOn());
-
-		expiresOn := ""
-		extendedExpiresOn := ""
+		expiresOn := tokenResponse.GetExpiresOn().Unix()
+		extendedExpiresOn := tokenResponse.GetExtendedExpiresOn().Unix()
 
 		accessToken := msalbase.CreateCredentialAccessToken(
 			homeAccountID,
